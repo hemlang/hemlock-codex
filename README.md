@@ -1,4 +1,4 @@
-# Hemlock Translation Dataset
+# Hemlock Translation Dataset (Codex)
 
 Training dataset for fine-tuning LLMs to generate [Hemlock](https://github.com/hemlang/hemlock) code. 120 working, tested examples covering algorithms, systems programming, cross-language translation, and practical programs.
 
