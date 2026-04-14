@@ -1,0 +1,93 @@
+// BST with insert, search, and delete operations
+
+fn new_node(value) {
+    return { value: value, left: null, right: null };
+}
+
+fn insert(root, value) {
+    if (root == null) {
+        return new_node(value);
+    }
+    if (value < root.value) {
+        root.left = insert(root.left, value);
+    } else if (value > root.value) {
+        root.right = insert(root.right, value);
+    }
+    return root;
+}
+
+fn search(root, value) {
+    if (root == null) {
+        return false;
+    }
+    if (value == root.value) {
+        return true;
+    }
+    if (value < root.value) {
+        return search(root.left, value);
+    }
+    return search(root.right, value);
+}
+
+fn find_min(root) {
+    let current = root;
+    while (current.left != null) {
+        current = current.left;
+    }
+    return current;
+}
+
+fn delete_node(root, value) {
+    if (root == null) {
+        return null;
+    }
+    if (value < root.value) {
+        root.left = delete_node(root.left, value);
+    } else if (value > root.value) {
+        root.right = delete_node(root.right, value);
+    } else {
+        if (root.left == null) {
+            return root.right;
+        }
+        if (root.right == null) {
+            return root.left;
+        }
+        let successor = find_min(root.right);
+        root.value = successor.value;
+        root.right = delete_node(root.right, successor.value);
+    }
+    return root;
+}
+
+fn inorder(root, result) {
+    if (root == null) {
+        return;
+    }
+    inorder(root.left, result);
+    result.push(root.value);
+    inorder(root.right, result);
+}
+
+let root = null;
+let values = [50, 30, 70, 20, 40, 60, 80];
+for (v in values) {
+    root = insert(root, v);
+}
+
+if (search(root, 40)) {
+    print("search 40: found");
+} else {
+    print("search 40: not found");
+}
+
+if (search(root, 25)) {
+    print("search 25: found");
+} else {
+    print("search 25: not found");
+}
+
+root = delete_node(root, 30);
+
+let result = [];
+inorder(root, result);
+print(`inorder: ${result.join(" ")}`);

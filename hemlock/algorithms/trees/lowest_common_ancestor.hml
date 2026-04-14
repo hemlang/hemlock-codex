@@ -1,0 +1,45 @@
+// Lowest Common Ancestor in BST
+
+fn new_node(value) {
+    return { value: value, left: null, right: null };
+}
+
+fn insert(root, value) {
+    if (root == null) {
+        return new_node(value);
+    }
+    if (value < root.value) {
+        root.left = insert(root.left, value);
+    } else if (value > root.value) {
+        root.right = insert(root.right, value);
+    }
+    return root;
+}
+
+fn lca(root, p, q) {
+    if (root == null) {
+        return null;
+    }
+    if (p < root.value && q < root.value) {
+        return lca(root.left, p, q);
+    }
+    if (p > root.value && q > root.value) {
+        return lca(root.right, p, q);
+    }
+    return root;
+}
+
+let root = null;
+let values = [50, 30, 70, 20, 40, 60, 80];
+for (v in values) {
+    root = insert(root, v);
+}
+
+let r1 = lca(root, 20, 40);
+print(`lca(20, 40): ${r1.value}`);
+
+let r2 = lca(root, 20, 70);
+print(`lca(20, 70): ${r2.value}`);
+
+let r3 = lca(root, 60, 80);
+print(`lca(60, 80): ${r3.value}`);

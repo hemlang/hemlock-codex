@@ -1,0 +1,54 @@
+// Trie insert, search, and prefix check
+
+fn new_trie_node() {
+    return { children: {}, is_end: false };
+}
+
+fn trie_insert(root, word) {
+    let node = root;
+    let chars = word.chars();
+    for (ch in chars) {
+        if (node.children[ch] == null) {
+            node.children[ch] = new_trie_node();
+        }
+        node = node.children[ch];
+    }
+    node.is_end = true;
+}
+
+fn trie_search(root, word) {
+    let node = root;
+    let chars = word.chars();
+    for (ch in chars) {
+        if (node.children[ch] == null) {
+            return false;
+        }
+        node = node.children[ch];
+    }
+    return node.is_end;
+}
+
+fn trie_starts_with(root, prefix) {
+    let node = root;
+    let chars = prefix.chars();
+    for (ch in chars) {
+        if (node.children[ch] == null) {
+            return false;
+        }
+        node = node.children[ch];
+    }
+    return true;
+}
+
+let root = new_trie_node();
+let words = ["apple", "app", "application", "bat", "ball"];
+for (w in words) {
+    trie_insert(root, w);
+}
+
+print(`search "app": ${trie_search(root, "app")}`);
+print(`search "ap": ${trie_search(root, "ap")}`);
+print(`search "bat": ${trie_search(root, "bat")}`);
+print(`starts_with "app": ${trie_starts_with(root, "app")}`);
+print(`starts_with "ba": ${trie_starts_with(root, "ba")}`);
+print(`starts_with "cat": ${trie_starts_with(root, "cat")}`);

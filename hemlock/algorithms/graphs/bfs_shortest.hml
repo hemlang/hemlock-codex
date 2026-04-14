@@ -1,0 +1,55 @@
+// BFS Shortest Path (Unweighted)
+// Finds shortest path in an unweighted graph using breadth-first search.
+
+fn bfs_shortest(adj, start, end, n) {
+    let visited = [];
+    let dist = [];
+    let prev = [];
+    for (let i = 0; i < n; i++) {
+        visited.push(false);
+        dist.push(-1);
+        prev.push(-1);
+    }
+
+    let queue = [];
+    queue.push(start);
+    visited[start] = true;
+    dist[start] = 0;
+
+    while (queue.length > 0) {
+        let u = queue.shift();
+        if (u == end) { break; }
+        for (v in adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                dist[v] = dist[u] + 1;
+                prev[v] = u;
+                queue.push(v);
+            }
+        }
+    }
+
+    // Reconstruct path
+    let path = [];
+    let current = end;
+    while (current != -1) {
+        path.unshift(current);
+        current = prev[current];
+    }
+
+    return { distance: dist[end], path: path };
+}
+
+// Graph: 0->[1,2], 1->[3], 2->[3,4], 3->[5], 4->[5]
+let adj = [
+    [1, 2],
+    [3],
+    [3, 4],
+    [5],
+    [5],
+    []
+];
+
+let result = bfs_shortest(adj, 0, 5, 6);
+print(`distance: ${result.distance}`);
+print(`path: ${result.path.join(" ")}`);

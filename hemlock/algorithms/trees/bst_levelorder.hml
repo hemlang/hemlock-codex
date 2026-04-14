@@ -1,0 +1,45 @@
+// BST level-order traversal (BFS using array as queue)
+
+fn new_node(value) {
+    return { value: value, left: null, right: null };
+}
+
+fn insert(root, value) {
+    if (root == null) {
+        return new_node(value);
+    }
+    if (value < root.value) {
+        root.left = insert(root.left, value);
+    } else if (value > root.value) {
+        root.right = insert(root.right, value);
+    }
+    return root;
+}
+
+fn levelorder(root) {
+    if (root == null) {
+        return [];
+    }
+    let result = [];
+    let queue = [root];
+    while (queue.length > 0) {
+        let node = queue.shift();
+        result.push(node.value);
+        if (node.left != null) {
+            queue.push(node.left);
+        }
+        if (node.right != null) {
+            queue.push(node.right);
+        }
+    }
+    return result;
+}
+
+let root = null;
+let values = [50, 30, 70, 20, 40, 60, 80];
+for (v in values) {
+    root = insert(root, v);
+}
+
+let result = levelorder(root);
+print(`levelorder: ${result.join(" ")}`);

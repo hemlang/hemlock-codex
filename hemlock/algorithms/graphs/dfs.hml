@@ -1,0 +1,41 @@
+// Depth-First Search Traversal
+// Explores a graph depth-first, visiting deeper nodes before backtracking.
+
+fn dfs(adj, start) {
+    let visited = [];
+    for (let i = 0; i < adj.length; i++) {
+        visited.push(false);
+    }
+    let order = [];
+    let stack = [start];
+
+    while (stack.length > 0) {
+        let u = stack.pop();
+        if (visited[u]) { continue; }
+        visited[u] = true;
+        order.push(u);
+
+        // Push neighbors in reverse so leftmost is visited first
+        let neighbors = adj[u];
+        for (let i = neighbors.length - 1; i >= 0; i--) {
+            if (!visited[neighbors[i]]) {
+                stack.push(neighbors[i]);
+            }
+        }
+    }
+
+    return order;
+}
+
+// Graph: 0->[1,2], 1->[3,4], 2->[5], 3->[], 4->[5], 5->[]
+let adj = [
+    [1, 2],
+    [3, 4],
+    [5],
+    [],
+    [5],
+    []
+];
+
+let result = dfs(adj, 0);
+print(`dfs: ${result.join(" ")}`);

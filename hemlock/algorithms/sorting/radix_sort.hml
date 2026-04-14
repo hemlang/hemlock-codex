@@ -1,0 +1,55 @@
+import { divi } from "@stdlib/math";
+
+fn counting_sort_by_digit(arr, exp) {
+    let n = arr.length;
+    let output = [];
+    let count = [];
+    for (let i = 0; i < n; i++) {
+        output.push(0);
+    }
+    for (let i = 0; i < 10; i++) {
+        count.push(0);
+    }
+
+    for (let i = 0; i < n; i++) {
+        let digit = divi(arr[i], exp) % 10;
+        count[digit] = count[digit] + 1;
+    }
+
+    for (let i = 1; i < 10; i++) {
+        count[i] = count[i] + count[i - 1];
+    }
+
+    for (let i = n - 1; i >= 0; i--) {
+        let digit = divi(arr[i], exp) % 10;
+        count[digit] = count[digit] - 1;
+        output[count[digit]] = arr[i];
+    }
+
+    for (let i = 0; i < n; i++) {
+        arr[i] = output[i];
+    }
+}
+
+fn radix_sort(arr) {
+    let n = arr.length;
+    if (n == 0) { return arr; }
+
+    let max_val = arr[0];
+    for (let i = 1; i < n; i++) {
+        if (arr[i] > max_val) {
+            max_val = arr[i];
+        }
+    }
+
+    let exp = 1;
+    while (divi(max_val, exp) > 0) {
+        counting_sort_by_digit(arr, exp);
+        exp = exp * 10;
+    }
+    return arr;
+}
+
+let arr = [64, 34, 25, 12, 22, 11, 90, 1, 45, 78];
+radix_sort(arr);
+print(arr.join(" "));

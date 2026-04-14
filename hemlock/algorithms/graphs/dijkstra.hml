@@ -1,0 +1,72 @@
+// Dijkstra's Shortest Path Algorithm
+// Finds shortest path in a weighted directed graph using a priority queue approach.
+
+import { HashMap } from "@stdlib/collections";
+import { divi } from "@stdlib/math";
+
+fn dijkstra(graph, start, end) {
+    let dist = HashMap();
+    let prev = HashMap();
+    let visited = HashMap();
+    let nodes = graph.keys();
+
+    // Initialize distances to infinity
+    for (node in nodes) {
+        dist.set(node, 999999999);
+    }
+    dist.set(start, 0);
+
+    // Simple priority queue via scanning
+    for (let i = 0; i < nodes.length; i++) {
+        // Find unvisited node with minimum distance
+        let u = null;
+        let min_dist = 999999999;
+        for (node in nodes) {
+            if (!visited.has(node) && dist.get(node) < min_dist) {
+                min_dist = dist.get(node);
+                u = node;
+            }
+        }
+
+        if (u == null) { break; }
+        if (u == end) { break; }
+        visited.set(u, true);
+
+        // Relax edges
+        let neighbors = graph.get(u);
+        for (edge in neighbors) {
+            let v = edge.to;
+            let alt = dist.get(u) + edge.weight;
+            if (alt < dist.get(v)) {
+                dist.set(v, alt);
+                prev.set(v, u);
+            }
+        }
+    }
+
+    // Reconstruct path
+    let path = [];
+    let current = end;
+    while (current != null) {
+        path.unshift(current);
+        if (prev.has(current)) {
+            current = prev.get(current);
+        } else {
+            current = null;
+        }
+    }
+
+    return { dist: dist.get(end), path: path };
+}
+
+// Build graph: A->B(4), A->C(2), B->D(3), C->B(1), C->D(5), D->E(1)
+let graph = HashMap();
+graph.set("A", [{ to: "B", weight: 4 }, { to: "C", weight: 2 }]);
+graph.set("B", [{ to: "D", weight: 3 }]);
+graph.set("C", [{ to: "B", weight: 1 }, { to: "D", weight: 5 }]);
+graph.set("D", [{ to: "E", weight: 1 }]);
+graph.set("E", []);
+
+let result = dijkstra(graph, "A", "E");
+print(`shortest A->E: ${result.dist}`);
+print(`path: ${result.path.join(" ")}`);

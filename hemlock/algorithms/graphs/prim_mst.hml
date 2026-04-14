@@ -1,0 +1,66 @@
+// Prim's Minimum Spanning Tree Algorithm
+// Grows the MST by always adding the cheapest edge that connects a new vertex.
+
+let INF = 999999999;
+let n = 5;
+
+// Adjacency matrix for undirected weighted graph
+// Edges: 0-1(2), 0-3(6), 1-2(3), 1-3(8), 1-4(5), 2-4(7), 3-4(9)
+let adj = [];
+for (let i = 0; i < n; i++) {
+    let row = [];
+    for (let j = 0; j < n; j++) {
+        row.push(0);
+    }
+    adj.push(row);
+}
+
+adj[0][1] = 2; adj[1][0] = 2;
+adj[0][3] = 6; adj[3][0] = 6;
+adj[1][2] = 3; adj[2][1] = 3;
+adj[1][3] = 8; adj[3][1] = 8;
+adj[1][4] = 5; adj[4][1] = 5;
+adj[2][4] = 7; adj[4][2] = 7;
+adj[3][4] = 9; adj[4][3] = 9;
+
+// Prim's algorithm
+let in_mst = [];
+let key = [];
+let parent = [];
+for (let i = 0; i < n; i++) {
+    in_mst.push(false);
+    key.push(INF);
+    parent.push(-1);
+}
+key[0] = 0;
+
+for (let count = 0; count < n; count++) {
+    // Pick minimum key vertex not yet in MST
+    let u = -1;
+    let min_key = INF;
+    for (let i = 0; i < n; i++) {
+        if (!in_mst[i] && key[i] < min_key) {
+            min_key = key[i];
+            u = i;
+        }
+    }
+
+    in_mst[u] = true;
+
+    // Update keys of adjacent vertices
+    for (let v = 0; v < n; v++) {
+        if (adj[u][v] > 0 && !in_mst[v] && adj[u][v] < key[v]) {
+            key[v] = adj[u][v];
+            parent[v] = u;
+        }
+    }
+}
+
+// Print MST edges and total weight
+let total = 0;
+print("prim MST edges:");
+for (let i = 1; i < n; i++) {
+    print(`  ${parent[i]} - ${i} (weight ${adj[parent[i]][i]})`);
+    total = total + adj[parent[i]][i];
+}
+print(`total weight: ${total}`);

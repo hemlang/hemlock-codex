@@ -1,0 +1,40 @@
+// Binary Search (Recursive)
+// Searches a sorted array for a target value using recursive bisection.
+
+import { divi } from "@stdlib/math";
+
+fn binary_search_rec(arr, target, low, high) {
+    if (low > high) {
+        return null;
+    }
+
+    let mid = low + divi(high - low, 2);
+
+    if (arr[mid] == target) {
+        return mid;
+    } else if (arr[mid] < target) {
+        return binary_search_rec(arr, target, mid + 1, high);
+    } else {
+        return binary_search_rec(arr, target, low, mid - 1);
+    }
+}
+
+fn binary_search(arr, target) {
+    return binary_search_rec(arr, target, 0, arr.length - 1);
+}
+
+let arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+
+let result1 = binary_search(arr, 23);
+if (result1 != null) {
+    print(`search 23: found at index ${result1}`);
+} else {
+    print("search 23: not found");
+}
+
+let result2 = binary_search(arr, 50);
+if (result2 != null) {
+    print(`search 50: found at index ${result2}`);
+} else {
+    print("search 50: not found");
+}

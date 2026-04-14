@@ -1,0 +1,49 @@
+// Interpolation Search
+// Uses the distribution of values to estimate the position of the target.
+// Works best on uniformly distributed sorted data. O(log log n) average case.
+
+import { divi } from "@stdlib/math";
+
+fn interpolation_search(arr, target) {
+    let low = 0;
+    let high = arr.length - 1;
+
+    while (low <= high && target >= arr[low] && target <= arr[high]) {
+        if (low == high) {
+            if (arr[low] == target) {
+                return low;
+            }
+            return null;
+        }
+
+        // Estimate position using linear interpolation
+        let range = arr[high] - arr[low];
+        let pos = low + divi((target - arr[low]) * (high - low), range);
+
+        if (arr[pos] == target) {
+            return pos;
+        } else if (arr[pos] < target) {
+            low = pos + 1;
+        } else {
+            high = pos - 1;
+        }
+    }
+
+    return null;
+}
+
+let arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+
+let result1 = interpolation_search(arr, 23);
+if (result1 != null) {
+    print(`search 23: found at index ${result1}`);
+} else {
+    print("search 23: not found");
+}
+
+let result2 = interpolation_search(arr, 50);
+if (result2 != null) {
+    print(`search 50: found at index ${result2}`);
+} else {
+    print("search 50: not found");
+}

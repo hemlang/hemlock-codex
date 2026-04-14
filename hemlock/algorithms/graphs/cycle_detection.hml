@@ -1,0 +1,56 @@
+// Cycle Detection in Directed Graph
+// Uses DFS with coloring: 0=white (unvisited), 1=gray (in progress), 2=black (done)
+
+fn has_cycle(adj, n) {
+    let color = [];
+    for (let i = 0; i < n; i++) {
+        color.push(0);
+    }
+
+    // Iterative DFS with explicit stack
+    for (let start = 0; start < n; start++) {
+        if (color[start] != 0) { continue; }
+
+        let stack = [{ node: start, idx: 0 }];
+        color[start] = 1;
+
+        while (stack.length > 0) {
+            let top = stack[stack.length - 1];
+            let u = top.node;
+            let neighbors = adj[u];
+
+            if (top.idx < neighbors.length) {
+                let v = neighbors[top.idx];
+                top.idx = top.idx + 1;
+                if (color[v] == 1) {
+                    return true;
+                }
+                if (color[v] == 0) {
+                    color[v] = 1;
+                    stack.push({ node: v, idx: 0 });
+                }
+            } else {
+                color[u] = 2;
+                stack.pop();
+            }
+        }
+    }
+
+    return false;
+}
+
+// Graph 1: has cycle (0->1->2->0)
+let adj1 = [[1], [2], [0, 3], []];
+if (has_cycle(adj1, 4)) {
+    print("graph1: cycle detected");
+} else {
+    print("graph1: no cycle");
+}
+
+// Graph 2: no cycle (DAG)
+let adj2 = [[1, 2], [3], [3], []];
+if (has_cycle(adj2, 4)) {
+    print("graph2: cycle detected");
+} else {
+    print("graph2: no cycle");
+}

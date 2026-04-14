@@ -1,0 +1,40 @@
+// Expression tree evaluation
+// Build tree for (2 + 3) * (4 - 1)
+
+fn new_node(value) {
+    return { value: value, left: null, right: null };
+}
+
+fn evaluate(node) {
+    if (node.left == null && node.right == null) {
+        return i32(node.value);
+    }
+    let left_val = evaluate(node.left);
+    let right_val = evaluate(node.right);
+    if (node.value == "+") {
+        return left_val + right_val;
+    }
+    if (node.value == "-") {
+        return left_val - right_val;
+    }
+    if (node.value == "*") {
+        return left_val * right_val;
+    }
+    return 0;
+}
+
+// Build: (2 + 3) * (4 - 1)
+let add_node = new_node("+");
+add_node.left = new_node("2");
+add_node.right = new_node("3");
+
+let sub_node = new_node("-");
+sub_node.left = new_node("4");
+sub_node.right = new_node("1");
+
+let mul_node = new_node("*");
+mul_node.left = add_node;
+mul_node.right = sub_node;
+
+let result = evaluate(mul_node);
+print(`result: ${result}`);

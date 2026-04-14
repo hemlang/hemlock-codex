@@ -1,0 +1,56 @@
+// Floyd-Warshall All-Pairs Shortest Paths
+// Computes shortest distances between all pairs of vertices.
+
+import { divi } from "@stdlib/math";
+
+let INF = 999999999;
+let n = 4;
+
+// Initialize distance matrix
+let dist = [];
+for (let i = 0; i < n; i++) {
+    let row = [];
+    for (let j = 0; j < n; j++) {
+        if (i == j) {
+            row.push(0);
+        } else {
+            row.push(INF);
+        }
+    }
+    dist.push(row);
+}
+
+// Edges: 0->1(3), 0->3(7), 1->0(8), 1->2(2), 2->0(5), 2->3(1), 3->0(2)
+dist[0][1] = 3;
+dist[0][3] = 7;
+dist[1][0] = 8;
+dist[1][2] = 2;
+dist[2][0] = 5;
+dist[2][3] = 1;
+dist[3][0] = 2;
+
+// Floyd-Warshall
+for (let k = 0; k < n; k++) {
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                dist[i][j] = dist[i][k] + dist[k][j];
+            }
+        }
+    }
+}
+
+// Print distance matrix
+print("distance matrix:");
+for (let i = 0; i < n; i++) {
+    let row_str = "";
+    for (let j = 0; j < n; j++) {
+        if (j > 0) { row_str = row_str + " "; }
+        if (dist[i][j] >= INF) {
+            row_str = row_str + "INF";
+        } else {
+            row_str = row_str + `${dist[i][j]}`;
+        }
+    }
+    print(row_str);
+}

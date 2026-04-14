@@ -1,0 +1,102 @@
+// AVL tree with rotations
+
+fn new_node(value) {
+    return { value: value, left: null, right: null, height: 1 };
+}
+
+fn height(node) {
+    if (node == null) {
+        return 0;
+    }
+    return node.height;
+}
+
+fn max_val(a, b) {
+    if (a > b) {
+        return a;
+    }
+    return b;
+}
+
+fn get_balance(node) {
+    if (node == null) {
+        return 0;
+    }
+    return height(node.left) - height(node.right);
+}
+
+fn right_rotate(y) {
+    let x = y.left;
+    let t2 = x.right;
+    x.right = y;
+    y.left = t2;
+    y.height = max_val(height(y.left), height(y.right)) + 1;
+    x.height = max_val(height(x.left), height(x.right)) + 1;
+    return x;
+}
+
+fn left_rotate(x) {
+    let y = x.right;
+    let t2 = y.left;
+    y.left = x;
+    x.right = t2;
+    x.height = max_val(height(x.left), height(x.right)) + 1;
+    y.height = max_val(height(y.left), height(y.right)) + 1;
+    return y;
+}
+
+fn insert(root, value) {
+    if (root == null) {
+        return new_node(value);
+    }
+    if (value < root.value) {
+        root.left = insert(root.left, value);
+    } else if (value > root.value) {
+        root.right = insert(root.right, value);
+    } else {
+        return root;
+    }
+
+    root.height = max_val(height(root.left), height(root.right)) + 1;
+    let balance = get_balance(root);
+
+    // Left Left
+    if (balance > 1 && value < root.left.value) {
+        return right_rotate(root);
+    }
+    // Right Right
+    if (balance < -1 && value > root.right.value) {
+        return left_rotate(root);
+    }
+    // Left Right
+    if (balance > 1 && value > root.left.value) {
+        root.left = left_rotate(root.left);
+        return right_rotate(root);
+    }
+    // Right Left
+    if (balance < -1 && value < root.right.value) {
+        root.right = right_rotate(root.right);
+        return left_rotate(root);
+    }
+
+    return root;
+}
+
+fn inorder(root, result) {
+    if (root == null) {
+        return;
+    }
+    inorder(root.left, result);
+    result.push(root.value);
+    inorder(root.right, result);
+}
+
+let root = null;
+let values = [10, 20, 30, 40, 50, 25];
+for (v in values) {
+    root = insert(root, v);
+}
+
+let result = [];
+inorder(root, result);
+print(`inorder: ${result.join(" ")}`);

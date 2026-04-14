@@ -1,0 +1,77 @@
+// Kruskal's Minimum Spanning Tree with Union-Find
+// Sorts all edges by weight and greedily adds edges that don't form cycles.
+
+// Union-Find data structures
+let uf_parent = [];
+let uf_rank = [];
+
+fn uf_init(n) {
+    for (let i = 0; i < n; i++) {
+        uf_parent.push(i);
+        uf_rank.push(0);
+    }
+}
+
+fn uf_find(x) {
+    while (uf_parent[x] != x) {
+        uf_parent[x] = uf_parent[uf_parent[x]];
+        x = uf_parent[x];
+    }
+    return x;
+}
+
+fn uf_union(a, b) {
+    let ra = uf_find(a);
+    let rb = uf_find(b);
+    if (ra == rb) { return false; }
+    if (uf_rank[ra] < uf_rank[rb]) {
+        uf_parent[ra] = rb;
+    } else if (uf_rank[ra] > uf_rank[rb]) {
+        uf_parent[rb] = ra;
+    } else {
+        uf_parent[rb] = ra;
+        uf_rank[ra] = uf_rank[ra] + 1;
+    }
+    return true;
+}
+
+let n = 5;
+// Same graph as Prim's: 0-1(2), 0-3(6), 1-2(3), 1-3(8), 1-4(5), 2-4(7), 3-4(9)
+let edges = [
+    { u: 0, v: 1, w: 2 },
+    { u: 0, v: 3, w: 6 },
+    { u: 1, v: 2, w: 3 },
+    { u: 1, v: 3, w: 8 },
+    { u: 1, v: 4, w: 5 },
+    { u: 2, v: 4, w: 7 },
+    { u: 3, v: 4, w: 9 }
+];
+
+// Sort edges by weight (simple insertion sort)
+for (let i = 1; i < edges.length; i++) {
+    let key_edge = edges[i];
+    let j = i - 1;
+    while (j >= 0 && edges[j].w > key_edge.w) {
+        edges[j + 1] = edges[j];
+        j = j - 1;
+    }
+    edges[j + 1] = key_edge;
+}
+
+uf_init(n);
+
+let mst_edges = [];
+let total = 0;
+
+for (edge in edges) {
+    if (uf_union(edge.u, edge.v)) {
+        mst_edges.push(edge);
+        total = total + edge.w;
+    }
+}
+
+print("kruskal MST edges:");
+for (e in mst_edges) {
+    print(`  ${e.u} - ${e.v} (weight ${e.w})`);
+}
+print(`total weight: ${total}`);
