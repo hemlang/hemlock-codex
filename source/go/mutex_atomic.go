@@ -1,0 +1,25 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+	"sync/atomic"
+)
+
+func main() {
+	var counter int32
+	var wg sync.WaitGroup
+
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 200; j++ {
+				atomic.AddInt32(&counter, 1)
+			}
+		}()
+	}
+
+	wg.Wait()
+	fmt.Printf("final: %d\n", atomic.LoadInt32(&counter))
+}
