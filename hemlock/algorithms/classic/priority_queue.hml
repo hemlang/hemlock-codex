@@ -1,0 +1,64 @@
+import { divi } from "@stdlib/math";
+
+fn make_pq() {
+    return { heap: [] };
+}
+
+fn pq_swap(heap, i, j) {
+    let tmp = heap[i];
+    heap[i] = heap[j];
+    heap[j] = tmp;
+}
+
+fn pq_insert(pq, val) {
+    pq.heap.push(val);
+    let i = pq.heap.length - 1;
+    while (i > 0) {
+        let parent = divi(i - 1, 2);
+        if (pq.heap[i] < pq.heap[parent]) {
+            pq_swap(pq.heap, i, parent);
+            i = parent;
+        } else {
+            break;
+        }
+    }
+}
+
+fn pq_extract_min(pq) {
+    let min = pq.heap[0];
+    let last = pq.heap.pop();
+    if (pq.heap.length > 0) {
+        pq.heap[0] = last;
+        let i = 0;
+        loop {
+            let left = 2 * i + 1;
+            let right = 2 * i + 2;
+            let smallest = i;
+            if (left < pq.heap.length && pq.heap[left] < pq.heap[smallest]) {
+                smallest = left;
+            }
+            if (right < pq.heap.length && pq.heap[right] < pq.heap[smallest]) {
+                smallest = right;
+            }
+            if (smallest != i) {
+                pq_swap(pq.heap, i, smallest);
+                i = smallest;
+            } else {
+                break;
+            }
+        }
+    }
+    return min;
+}
+
+let pq = make_pq();
+let values = [5, 3, 7, 1, 4, 2];
+for (v in values) {
+    pq_insert(pq, v);
+}
+
+let results = [];
+for (let i = 0; i < 6; i++) {
+    results.push(pq_extract_min(pq));
+}
+print(results.join(" "));

@@ -1,0 +1,30 @@
+fn permutations(s) {
+    let results = [];
+    let chars = s.chars();
+    fn permute(arr, start) {
+        if (start == arr.length - 1) {
+            results.push(arr.join(""));
+            return;
+        }
+        for (let i = start; i < arr.length; i++) {
+            // swap
+            let tmp = arr[start];
+            arr[start] = arr[i];
+            arr[i] = tmp;
+
+            permute(arr, start + 1);
+
+            // swap back
+            tmp = arr[start];
+            arr[start] = arr[i];
+            arr[i] = tmp;
+        }
+    }
+    permute(chars, 0);
+    return results;
+}
+
+let perms = permutations("abc");
+for (p in perms) {
+    print(p);
+}

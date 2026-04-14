@@ -1,0 +1,64 @@
+// Rust equivalent:
+// fn main() {
+//     let nums: Vec<i32> = (1..=20).collect();
+//     println!("range: {:?}", nums);
+//
+//     let evens: Vec<i32> = nums.iter().filter(|&&x| x % 2 == 0).cloned().collect();
+//     println!("evens: {:?}", evens);
+//
+//     let squared: Vec<i32> = evens.iter().map(|&x| x * x).collect();
+//     println!("squared: {:?}", squared);
+//
+//     let sum: i32 = squared.iter().fold(0, |acc, &x| acc + x);
+//     println!("sum of squared evens: {}", sum);
+//
+//     // Chained in one expression
+//     let result: i32 = (1..=20)
+//         .filter(|x| x % 3 == 0)
+//         .map(|x| x + 10)
+//         .fold(0, |acc, x| acc + x);
+//     println!("chained result: {}", result);
+//
+//     // Collect to strings
+//     let labels: Vec<String> = (1..=5)
+//         .map(|x| format!("item_{}", x))
+//         .collect();
+//     println!("labels: {:?}", labels);
+// }
+
+// In Hemlock, iterator chains become array method chains.
+// No lazy iterators — each step produces a new array.
+
+// Build range 1..=20 (no range syntax, use a loop or array + map)
+let nums = [];
+for (let i = 1; i <= 20; i++) {
+    nums.push(i);
+}
+print(`range: ${nums}`);
+
+// Filter evens
+let evens = nums.filter(fn(x) { return x % 2 == 0; });
+print(`evens: ${evens}`);
+
+// Map: square each
+let squared = evens.map(fn(x) { return x * x; });
+print(`squared: ${squared}`);
+
+// Fold/reduce: sum
+let sum = squared.reduce(fn(acc, x) { return acc + x; }, 0);
+print(`sum of squared evens: ${sum}`);
+
+// Chained in one expression: filter multiples of 3, add 10, sum
+let chained = nums
+    .filter(fn(x) { return x % 3 == 0; })
+    .map(fn(x) { return x + 10; })
+    .reduce(fn(acc, x) { return acc + x; }, 0);
+print(`chained result: ${chained}`);
+
+// Collect to strings
+let indices = [];
+for (let i = 1; i <= 5; i++) {
+    indices.push(i);
+}
+let labels = indices.map(fn(x) { return `item_${x}`; });
+print(`labels: ${labels}`);

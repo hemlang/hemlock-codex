@@ -1,0 +1,53 @@
+// Growing buffer that doubles when full (using buffer type with buffer_ptr)
+// Write "Hello, World!" as bytes, then read back
+
+let capacity = 4;
+let size = 0;
+let buf = buffer(capacity);
+
+fn buf_grow() {
+    let new_cap = capacity * 2;
+    let new_buf = buffer(new_cap);
+    // Copy old data to new buffer
+    let src = buffer_ptr(buf);
+    let dst = buffer_ptr(new_buf);
+    memcpy(dst, src, size);
+    capacity = new_cap;
+    buf = new_buf;
+}
+
+fn write_byte(b: u8) {
+    if (size >= capacity) {
+        buf_grow();
+    }
+    let p = buffer_ptr(buf);
+    let slot = ptr_offset(p, size, 1);
+    ptr_write_u8(slot, b);
+    size++;
+}
+
+fn read_back() {
+    let result = "";
+    let p = buffer_ptr(buf);
+    for (let i = 0; i < size; i++) {
+        let slot = ptr_offset(p, i, 1);
+        let b = ptr_deref_u8(slot);
+        let ch = rune(b);
+        result = result + ch;
+    }
+    return result;
+}
+
+// Write "Hello, World!" as individual bytes
+let message = "Hello, World!";
+let bytes = message.bytes();
+for (b in bytes) {
+    write_byte(b);
+}
+
+print(`wrote ${size} bytes`);
+print(`capacity: ${capacity}`);
+
+// Read back and reconstruct string
+let reconstructed = read_back();
+print(`reconstructed: ${reconstructed}`);

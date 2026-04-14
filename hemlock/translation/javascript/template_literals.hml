@@ -1,0 +1,36 @@
+// JavaScript equivalent:
+// const name = "World";
+// const a = 10, b = 20;
+// console.log(`Hello, ${name}!`);
+// console.log(`${a} + ${b} = ${a + b}`);
+// console.log(`Is ${a} > ${b}? ${a > b}`);
+// const items = ["apple", "banana", "cherry"];
+// console.log(`Items: ${items.join(", ")}`);
+// console.log(`Upper: ${"hemlock".toUpperCase()}`);
+
+// In Hemlock, template literals use the exact same syntax as JavaScript.
+// Backtick strings with ${expr} interpolation.
+
+let name = "World";
+let a = 10;
+let b = 20;
+
+// Basic interpolation
+print(`Hello, ${name}!`);
+
+// Expression evaluation inside templates
+print(`${a} + ${b} = ${a + b}`);
+
+// Boolean expressions
+print(`Is ${a} > ${b}? ${a > b}`);
+
+// Method calls inside templates
+let items = ["apple", "banana", "cherry"];
+print(`Items: ${items.join(", ")}`);
+
+// String method in template
+print(`Upper: ${"hemlock".to_upper()}`);
+
+// Nested template usage
+let user = { name: "Alice", age: 30 };
+print(`User: ${user.name}, Age: ${user.age}`);

@@ -1,0 +1,42 @@
+// Async File Processing
+// 3 tasks each process simulated "file" data in parallel,
+// then collect and print results.
+
+async fn process_file(name, data) {
+    // Simulate processing: compute sum and max of the data
+    let sum = 0;
+    let max = data[0];
+    for (let i = 0; i < data.length; i++) {
+        sum = sum + data[i];
+        if (data[i] > max) {
+            max = data[i];
+        }
+    }
+    return { name: name, sum: sum, max: max, count: data.length };
+}
+
+// Simulated file data
+let files = [
+    { name: "data_a.csv", data: [10, 20, 30, 40, 50] },
+    { name: "data_b.csv", data: [5, 15, 25, 35, 45, 55] },
+    { name: "data_c.csv", data: [100, 200, 300] }
+];
+
+// Spawn processing tasks in parallel
+let tasks = [];
+for (let i = 0; i < files.length; i++) {
+    tasks.push(spawn(process_file, files[i].name, files[i].data));
+}
+
+// Collect results
+let results = [];
+for (let i = 0; i < tasks.length; i++) {
+    results.push(join(tasks[i]));
+}
+
+// Print results
+for (let i = 0; i < results.length; i++) {
+    let r = results[i];
+    print(`${r.name}: sum=${r.sum} max=${r.max} count=${r.count}`);
+}
+print("all files processed");

@@ -1,0 +1,74 @@
+// C equivalent:
+// #include <stdio.h>
+// #include <pthread.h>
+//
+// #define NUM_THREADS 4
+//
+// typedef struct { int start; int end; long sum; } WorkerArgs;
+//
+// void *worker(void *arg) {
+//     WorkerArgs *wa = (WorkerArgs *)arg;
+//     wa->sum = 0;
+//     for (int i = wa->start; i <= wa->end; i++) {
+//         wa->sum += i;
+//     }
+//     return NULL;
+// }
+//
+// int main() {
+//     pthread_t threads[NUM_THREADS];
+//     WorkerArgs args[NUM_THREADS];
+//     int chunk = 100 / NUM_THREADS;
+//
+//     for (int i = 0; i < NUM_THREADS; i++) {
+//         args[i].start = i * chunk + 1;
+//         args[i].end = (i == NUM_THREADS - 1) ? 100 : (i + 1) * chunk;
+//         pthread_create(&threads[i], NULL, worker, &args[i]);
+//     }
+//
+//     long total = 0;
+//     for (int i = 0; i < NUM_THREADS; i++) {
+//         pthread_join(threads[i], NULL);
+//         total += args[i].sum;
+//     }
+//     printf("total: %ld\n", total);
+//     return 0;
+// }
+
+// In Hemlock, pthreads become spawn/join.
+// No need for void* casting, mutex setup, or thread attribute structs.
+// Each spawned task returns a value directly.
+
+import { divi } from "@stdlib/math";
+
+async fn worker(start, end) {
+    let sum = 0;
+    for (let i = start; i <= end; i++) {
+        sum = sum + i;
+    }
+    return sum;
+}
+
+let num_threads = 4;
+let chunk = divi(100, num_threads);
+
+let tasks = [];
+for (let i = 0; i < num_threads; i++) {
+    let start = i * chunk + 1;
+    let end = chunk;
+    if (i == num_threads - 1) {
+        end = 100;
+    } else {
+        end = (i + 1) * chunk;
+    }
+    let t = spawn(worker, start, end);
+    tasks.push(t);
+}
+
+let total = 0;
+for (t in tasks) {
+    let result = join(t);
+    total = total + result;
+}
+
+print(`total: ${total}`);

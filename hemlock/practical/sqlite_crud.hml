@@ -1,0 +1,52 @@
+// SQLite CRUD operations
+import { open_db, exec, query, insert, update, delete_rows, close_db } from "@stdlib/sqlite";
+
+let db = open_db(":memory:");
+
+// Create table
+exec(db, "CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, age INTEGER)");
+print("=== Created users table ===");
+
+// Insert rows
+insert(db, "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", ["Alice", "alice@example.com", 30]);
+insert(db, "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", ["Bob", "bob@example.com", 25]);
+insert(db, "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", ["Charlie", "charlie@example.com", 35]);
+insert(db, "INSERT INTO users (name, email, age) VALUES (?, ?, ?)", ["Diana", "diana@example.com", 28]);
+print("Inserted 4 users");
+
+// Read all
+print("\n=== All Users ===");
+let rows = query(db, "SELECT * FROM users");
+for (row in rows) {
+    print(`  id=${row.id} name=${row.name} email=${row.email} age=${row.age}`);
+}
+
+// Read with filter
+print("\n=== Users over 28 ===");
+let older = query(db, "SELECT name, age FROM users WHERE age > ?", [28]);
+for (row in older) {
+    print(`  ${row.name} (age ${row.age})`);
+}
+
+// Update
+let changed = update(db, "UPDATE users SET age = 31 WHERE name = ?", ["Alice"]);
+print(`\n=== Updated ${changed} row(s) ===`);
+let alice = query(db, "SELECT name, age FROM users WHERE name = ?", ["Alice"]);
+print(`  Alice is now age ${alice[0].age}`);
+
+// Delete
+let deleted = delete_rows(db, "DELETE FROM users WHERE name = ?", ["Charlie"]);
+print(`\n=== Deleted ${deleted} row(s) ===`);
+let remaining = query(db, "SELECT name FROM users");
+let names = [];
+for (row in remaining) {
+    names.push(row.name);
+}
+print(`  Remaining users: ${names.join(", ")}`);
+
+// Count
+let count_rows = query(db, "SELECT COUNT(*) as cnt FROM users");
+print(`  Total users: ${count_rows[0].cnt}`);
+
+close_db(db);
+print("\nDatabase closed.");

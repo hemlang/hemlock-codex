@@ -1,0 +1,54 @@
+// Pipeline Pattern
+// Multi-stage channel pipeline: generate -> double -> add10 -> collect and print
+
+let gen_ch = channel(5);
+let dbl_ch = channel(5);
+let add_ch = channel(5);
+
+async fn generate(out) {
+    for (let i = 1; i <= 5; i++) {
+        out.send(i);
+    }
+    out.close();
+}
+
+async fn double_stage(input, output) {
+    loop {
+        let val = input.recv();
+        if (val == null) {
+            break;
+        }
+        output.send(val * 2);
+    }
+    output.close();
+}
+
+async fn add10_stage(input, output) {
+    loop {
+        let val = input.recv();
+        if (val == null) {
+            break;
+        }
+        output.send(val + 10);
+    }
+    output.close();
+}
+
+let t1 = spawn(generate, gen_ch);
+let t2 = spawn(double_stage, gen_ch, dbl_ch);
+let t3 = spawn(add10_stage, dbl_ch, add_ch);
+
+let results = [];
+loop {
+    let val = add_ch.recv();
+    if (val == null) {
+        break;
+    }
+    results.push(val);
+}
+
+join(t1);
+join(t2);
+join(t3);
+
+print(results.join(" "));

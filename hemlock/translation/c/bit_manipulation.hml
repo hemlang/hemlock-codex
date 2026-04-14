@@ -1,0 +1,80 @@
+// C equivalent:
+// #include <stdio.h>
+//
+// void set_bit(int *n, int pos) { *n |= (1 << pos); }
+// void clear_bit(int *n, int pos) { *n &= ~(1 << pos); }
+// void toggle_bit(int *n, int pos) { *n ^= (1 << pos); }
+// int check_bit(int n, int pos) { return (n >> pos) & 1; }
+//
+// int count_bits(int n) {
+//     int count = 0;
+//     while (n) { count += n & 1; n >>= 1; }
+//     return count;
+// }
+//
+// int main() {
+//     int flags = 0;
+//     set_bit(&flags, 0);
+//     set_bit(&flags, 3);
+//     set_bit(&flags, 7);
+//     printf("after set: %d\n", flags);       // 137
+//     printf("bit 3: %d\n", check_bit(flags, 3)); // 1
+//     printf("bit 2: %d\n", check_bit(flags, 2)); // 0
+//     clear_bit(&flags, 0);
+//     printf("after clear bit 0: %d\n", flags);   // 136
+//     toggle_bit(&flags, 3);
+//     printf("after toggle bit 3: %d\n", flags);  // 128
+//     printf("popcount: %d\n", count_bits(flags)); // 1
+//     printf("left shift: %d\n", 1 << 10);       // 1024
+//     printf("right shift: %d\n", 256 >> 3);     // 32
+//     return 0;
+// }
+
+// In Hemlock, bitwise operators are identical to C: &, |, ^, ~, <<, >>
+// The main difference is no pass-by-pointer — functions return new values.
+
+fn set_bit(n, pos) {
+    return n | (1 << pos);
+}
+
+fn clear_bit(n, pos) {
+    return n & ~(1 << pos);
+}
+
+fn toggle_bit(n, pos) {
+    return n ^ (1 << pos);
+}
+
+fn check_bit(n, pos) {
+    return (n >> pos) & 1;
+}
+
+fn count_bits(n) {
+    let count = 0;
+    let val = n;
+    while (val != 0) {
+        count = count + (val & 1);
+        val = val >> 1;
+    }
+    return count;
+}
+
+let flags = 0;
+flags = set_bit(flags, 0);   // bit 0
+flags = set_bit(flags, 3);   // bit 3
+flags = set_bit(flags, 7);   // bit 7
+print(`after set: ${flags}`);
+
+print(`bit 3: ${check_bit(flags, 3)}`);
+print(`bit 2: ${check_bit(flags, 2)}`);
+
+flags = clear_bit(flags, 0);
+print(`after clear bit 0: ${flags}`);
+
+flags = toggle_bit(flags, 3);
+print(`after toggle bit 3: ${flags}`);
+
+print(`popcount: ${count_bits(flags)}`);
+
+print(`left shift: ${1 << 10}`);
+print(`right shift: ${256 >> 3}`);

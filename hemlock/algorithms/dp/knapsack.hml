@@ -1,0 +1,39 @@
+// 0/1 Knapsack Problem
+// Dynamic programming approach to maximize value while
+// staying within weight capacity.
+
+import { max } from "@stdlib/math";
+
+fn knapsack(weights, values, capacity) {
+    let n = weights.length;
+
+    // Build DP table: dp[i][w] = max value using items 0..i-1 with capacity w
+    let dp = [];
+    for (let i = 0; i <= n; i++) {
+        let row = [];
+        for (let w = 0; w <= capacity; w++) {
+            row.push(0);
+        }
+        dp.push(row);
+    }
+
+    for (let i = 1; i <= n; i++) {
+        for (let w = 0; w <= capacity; w++) {
+            // Don't take item i-1
+            dp[i][w] = dp[i - 1][w];
+            // Take item i-1 if it fits
+            if (weights[i - 1] <= w) {
+                let with_item = dp[i - 1][w - weights[i - 1]] + values[i - 1];
+                dp[i][w] = max(dp[i][w], with_item);
+            }
+        }
+    }
+
+    return dp[n][capacity];
+}
+
+let weights = [2, 3, 4, 5];
+let values = [3, 4, 5, 6];
+let capacity = 8;
+let result = knapsack(weights, values, capacity);
+print(`max value: ${result}`);

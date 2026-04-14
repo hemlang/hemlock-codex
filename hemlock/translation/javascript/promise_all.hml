@@ -1,0 +1,22 @@
+// JavaScript equivalent:
+// async function square(n) { return n * n; }
+// const results = await Promise.all([square(1), square(2), square(3)]);
+// console.log("results: " + results.join(" "));
+// Output: results: 1 4 9
+
+// In Hemlock, Promise.all becomes spawn + join on each task.
+// spawn() launches an async task; join() waits for its result.
+
+async fn square(n) {
+    return n * n;
+}
+
+let t1 = spawn(square, 1);
+let t2 = spawn(square, 2);
+let t3 = spawn(square, 3);
+
+let r1 = join(t1);
+let r2 = join(t2);
+let r3 = join(t3);
+
+print(`results: ${r1} ${r2} ${r3}`);

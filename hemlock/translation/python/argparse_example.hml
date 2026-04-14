@@ -1,0 +1,40 @@
+// Python equivalent:
+// import argparse
+// parser = argparse.ArgumentParser(description="Demo CLI tool")
+// parser.add_argument("--name", default="World", help="Name to greet")
+// parser.add_argument("--count", type=int, default=3, help="Repeat count")
+// parser.add_argument("--upper", action="store_true", help="Uppercase output")
+// args = parser.parse_args()
+// for i in range(args.count):
+//     msg = f"Hello, {args.name}!"
+//     if args.upper:
+//         msg = msg.upper()
+//     print(msg)
+
+// In Hemlock, @stdlib/args provides parse() for CLI argument parsing.
+// We simulate arguments with a test array to demonstrate the API.
+
+import { parse, has_flag, get_option } from "@stdlib/args";
+
+// Simulate: script.hml --name Alice --count 3 --upper
+let test_args = ["script.hml", "--name", "Alice", "--count", "3", "--upper"];
+
+let parsed = parse(test_args, { strings: ["name", "count"] });
+
+// Extract values with defaults
+let name = get_option(parsed, "name", "World");
+let count_str = get_option(parsed, "count", "3");
+let count = i32(count_str);
+let upper = has_flag(parsed, "upper");
+
+print(`name: ${name}`);
+print(`count: ${count}`);
+print(`upper: ${upper}`);
+
+for (let i = 0; i < count; i++) {
+    let msg = `Hello, ${name}!`;
+    if (upper) {
+        msg = msg.to_upper();
+    }
+    print(msg);
+}

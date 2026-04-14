@@ -1,0 +1,40 @@
+// Lock-Free Atomic Counter
+// 10 tasks each increment a shared atomic counter 100 times.
+// Expected final value: 1000
+
+import { atomic_add_i32, atomic_load_i32 } from "@stdlib/atomic";
+
+let counter = alloc(4);
+memset(counter, 0, 4);
+
+let done_ch = channel(10);
+
+async fn increment_worker(counter, iterations, done_ch) {
+    for (let i = 0; i < iterations; i++) {
+        atomic_add_i32(counter, 1);
+    }
+    done_ch.send(1);
+}
+
+let num_tasks = 10;
+let iterations = 100;
+
+let tasks = [];
+for (let i = 0; i < num_tasks; i++) {
+    tasks.push(spawn(increment_worker, counter, iterations, done_ch));
+}
+
+// Wait for all tasks
+for (let i = 0; i < num_tasks; i++) {
+    join(tasks[i]);
+}
+
+for (let i = 0; i < num_tasks; i++) {
+    done_ch.recv();
+}
+done_ch.close();
+
+let final_val = atomic_load_i32(counter);
+free(counter);
+
+print(`final: ${final_val}`);

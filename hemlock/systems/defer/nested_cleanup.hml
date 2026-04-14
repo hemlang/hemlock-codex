@@ -1,0 +1,18 @@
+fn inner() {
+    defer print("inner cleanup");
+    print("inner running");
+}
+
+fn middle() {
+    defer print("middle cleanup");
+    print("middle running");
+    inner();
+}
+
+fn outer() {
+    defer print("outer cleanup");
+    print("outer running");
+    middle();
+}
+
+outer();

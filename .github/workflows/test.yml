@@ -1,0 +1,65 @@
+name: Test Hemlock Files
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            uuid-dev \
+            libsqlite3-dev \
+            libffi-dev \
+            libpcre2-dev \
+            zlib1g-dev || true
+          # Optional deps that may not be available
+          sudo apt-get install -y liblws-dev libusearch-dev 2>/dev/null || true
+
+      - name: Build Hemlock
+        run: |
+          git clone https://github.com/hemlang/hemlock.git /tmp/hemlock-build
+          cd /tmp/hemlock-build
+          make
+          echo "/tmp/hemlock-build" >> "$GITHUB_PATH"
+
+      - name: Run all .hml tests
+        run: |
+          pass=0
+          fail=0
+          errors=""
+
+          while IFS= read -r file; do
+            rel="${file#./}"
+            if timeout 10 hemlock "$file" > /dev/null 2>&1; then
+              echo "PASS: $rel"
+              pass=$((pass + 1))
+            else
+              code=$?
+              echo "FAIL: $rel (exit code $code)"
+              fail=$((fail + 1))
+              errors="${errors}  - ${rel}\n"
+            fi
+          done < <(find hemlock/ -name '*.hml' -type f | sort)
+
+          echo ""
+          echo "================================"
+          echo "Results: $pass passed, $fail failed out of $((pass + fail)) total"
+          echo "================================"
+
+          if [ "$fail" -gt 0 ]; then
+            echo ""
+            echo "Failed files:"
+            echo -e "$errors"
+            exit 1
+          fi

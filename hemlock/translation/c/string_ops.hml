@@ -1,0 +1,62 @@
+// C equivalent:
+// #include <stdio.h>
+// #include <string.h>
+//
+// int main() {
+//     // strlen
+//     const char *s = "Hello, World!";
+//     printf("length: %zu\n", strlen(s));
+//
+//     // strcat (via snprintf)
+//     char buf[64];
+//     snprintf(buf, sizeof(buf), "%s %s", "Hello,", "World!");
+//     printf("concat: %s\n", buf);
+//
+//     // strcmp
+//     printf("equal: %d\n", strcmp("abc", "abc") == 0);
+//     printf("less: %d\n", strcmp("abc", "def") < 0);
+//
+//     // strstr
+//     const char *found = strstr(s, "World");
+//     printf("found at: %ld\n", found - s);
+//
+//     // manual replace (C has no built-in)
+//     // ... tedious in C, trivial in Hemlock
+//     return 0;
+// }
+
+// In Hemlock, strings are first-class with built-in methods.
+// No need for <string.h> — methods are on the string value itself.
+
+let s = "Hello, World!";
+
+// strlen → .length
+print(`length: ${s.length}`);
+
+// strcat → string concatenation with +
+let greeting = "Hello," + " " + "World!";
+print(`concat: ${greeting}`);
+
+// strcmp → direct comparison with == and <
+let a = "abc";
+let b = "abc";
+let c = "def";
+print(`equal: ${a == b}`);
+print(`less: ${a < c}`);
+
+// strstr → .find() returns index or -1
+let idx = s.find("World");
+print(`found at: ${idx}`);
+
+// No C equivalent — Hemlock has built-in replace
+let replaced = s.replace("World", "Hemlock");
+print(`replaced: ${replaced}`);
+
+// More string methods that are painful in C
+print(`upper: ${s.to_upper()}`);
+print(`starts_with: ${s.starts_with("Hello")}`);
+print(`contains: ${s.contains("World")}`);
+
+let csv = "one,two,three";
+let parts = csv.split(",");
+print(`split: ${parts.join(" | ")}`);

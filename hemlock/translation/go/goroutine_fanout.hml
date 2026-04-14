@@ -1,0 +1,88 @@
+// Go equivalent:
+// package main
+//
+// import (
+//     "fmt"
+//     "sort"
+//     "sync"
+// )
+//
+// func worker(id int, jobs <-chan int, results chan<- int, wg *sync.WaitGroup) {
+//     defer wg.Done()
+//     for j := range jobs {
+//         results <- j * j
+//     }
+// }
+//
+// func main() {
+//     jobs := make(chan int, 12)
+//     results := make(chan int, 12)
+//     var wg sync.WaitGroup
+//
+//     for w := 0; w < 4; w++ {
+//         wg.Add(1)
+//         go worker(w, jobs, results, &wg)
+//     }
+//
+//     for i := 1; i <= 12; i++ {
+//         jobs <- i
+//     }
+//     close(jobs)
+//
+//     wg.Wait()
+//     close(results)
+//
+//     var collected []int
+//     for r := range results {
+//         collected = append(collected, r)
+//     }
+//     sort.Ints(collected)
+//     fmt.Println(collected)
+// }
+
+// In Hemlock, goroutines become spawn(), channels work similarly,
+// and sync.WaitGroup is replaced by join() on task handles.
+
+let jobs = channel(12);
+let results = channel(12);
+
+async fn worker(jobs, results) {
+    loop {
+        let j = jobs.recv();
+        if (j == null) {
+            break;
+        }
+        results.send(j * j);
+    }
+}
+
+// Send all jobs
+for (let i = 1; i <= 12; i++) {
+    jobs.send(i);
+}
+jobs.close();
+
+// Spawn 4 workers (fan-out)
+let tasks = [];
+for (let w = 0; w < 4; w++) {
+    tasks.push(spawn(worker, jobs, results));
+}
+
+// Wait for all workers (replaces wg.Wait())
+for (let i = 0; i < 4; i++) {
+    join(tasks[i]);
+}
+results.close();
+
+// Collect results (fan-in)
+let collected = [];
+loop {
+    let r = results.recv();
+    if (r == null) {
+        break;
+    }
+    collected.push(r);
+}
+
+collected.sort();
+print(collected.join(" "));

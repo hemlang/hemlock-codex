@@ -1,0 +1,57 @@
+// Go equivalent:
+// package main
+//
+// import (
+//     "fmt"
+//     "sync"
+// )
+//
+// func main() {
+//     var mu sync.Mutex
+//     counter := 0
+//     var wg sync.WaitGroup
+//
+//     for i := 0; i < 5; i++ {
+//         wg.Add(1)
+//         go func() {
+//             defer wg.Done()
+//             for j := 0; j < 200; j++ {
+//                 mu.Lock()
+//                 counter++
+//                 mu.Unlock()
+//             }
+//         }()
+//     }
+//
+//     wg.Wait()
+//     fmt.Printf("final: %d\n", counter)
+// }
+
+// In Hemlock, sync.Mutex is replaced by atomic operations.
+// atomic_add_i32 provides lock-free thread-safe increments,
+// which is actually more efficient than mutex for simple counters.
+
+import { atomic_add_i32, atomic_load_i32 } from "@stdlib/atomic";
+
+let counter = alloc(4);
+memset(counter, 0, 4);
+
+async fn incrementer(counter, n) {
+    for (let j = 0; j < n; j++) {
+        atomic_add_i32(counter, 1);
+    }
+}
+
+let tasks = [];
+for (let i = 0; i < 5; i++) {
+    tasks.push(spawn(incrementer, counter, 200));
+}
+
+for (let i = 0; i < 5; i++) {
+    join(tasks[i]);
+}
+
+let final_val = atomic_load_i32(counter);
+free(counter);
+
+print(`final: ${final_val}`);

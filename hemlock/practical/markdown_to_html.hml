@@ -1,0 +1,75 @@
+// Basic markdown to HTML converter
+
+fn convert_inline(line) {
+    let result = line;
+
+    // Bold: **text**
+    while (result.contains("**")) {
+        let start = result.find("**");
+        let rest = result.slice(start + 2);
+        let end = rest.find("**");
+        if (end < 0) { break; }
+        let bold_text = rest.substr(0, end);
+        let before = result.substr(0, start);
+        let after = rest.slice(end + 2);
+        result = `${before}<strong>${bold_text}</strong>${after}`;
+    }
+
+    // Italic: *text*
+    while (result.contains("*")) {
+        let start = result.find("*");
+        let rest = result.slice(start + 1);
+        let end = rest.find("*");
+        if (end < 0) { break; }
+        let ital_text = rest.substr(0, end);
+        let before = result.substr(0, start);
+        let after = rest.slice(end + 1);
+        result = `${before}<em>${ital_text}</em>${after}`;
+    }
+
+    // Inline code: `text`
+    while (result.contains("`")) {
+        let start = result.find("`");
+        let rest = result.slice(start + 1);
+        let end = rest.find("`");
+        if (end < 0) { break; }
+        let code_text = rest.substr(0, end);
+        let before = result.substr(0, start);
+        let after = rest.slice(end + 1);
+        result = `${before}<code>${code_text}</code>${after}`;
+    }
+
+    return result;
+}
+
+fn md_to_html(text) {
+    let lines = text.split("\n");
+    let html = [];
+
+    for (line in lines) {
+        if (line.starts_with("### ")) {
+            let content = convert_inline(line.slice(4));
+            html.push(`<h3>${content}</h3>`);
+        } else if (line.starts_with("## ")) {
+            let content = convert_inline(line.slice(3));
+            html.push(`<h2>${content}</h2>`);
+        } else if (line.starts_with("# ")) {
+            let content = convert_inline(line.slice(2));
+            html.push(`<h1>${content}</h1>`);
+        } else if (line.starts_with("- ")) {
+            let content = convert_inline(line.slice(2));
+            html.push(`<li>${content}</li>`);
+        } else if (line.trim() == "") {
+            html.push("");
+        } else {
+            html.push(`<p>${convert_inline(line)}</p>`);
+        }
+    }
+
+    return html.join("\n");
+}
+
+let markdown = "# Hello World\n\nThis is **bold** and *italic* text.\n\n## Features\n\n- Item with `code`\n- Another **bold** item\n\n### Details\n\nA paragraph with **mixed** and *styles*.";
+
+let html = md_to_html(markdown);
+print(html);

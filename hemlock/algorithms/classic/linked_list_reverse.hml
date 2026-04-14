@@ -1,0 +1,40 @@
+fn make_node(val, next) {
+    return { val: val, next: next };
+}
+
+fn build_list(arr) {
+    let head = null;
+    let i = arr.length - 1;
+    while (i >= 0) {
+        head = make_node(arr[i], head);
+        i--;
+    }
+    return head;
+}
+
+fn print_list(head, label) {
+    let parts = [];
+    let curr = head;
+    while (curr != null) {
+        parts.push(curr.val);
+        curr = curr.next;
+    }
+    print(`${label}: ${parts.join(" ")}`);
+}
+
+fn reverse_list(head) {
+    let prev = null;
+    let curr = head;
+    while (curr != null) {
+        let next = curr.next;
+        curr.next = prev;
+        prev = curr;
+        curr = next;
+    }
+    return prev;
+}
+
+let head = build_list([1, 2, 3, 4, 5]);
+print_list(head, "original");
+let reversed = reverse_list(head);
+print_list(reversed, "reversed");

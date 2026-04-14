@@ -1,0 +1,28 @@
+fn is_balanced(s) {
+    let stack = [];
+    let chars = s.chars();
+    for (let i = 0; i < chars.length; i++) {
+        let c = chars[i];
+        if (c == '(' || c == '{' || c == '[') {
+            stack.push(c);
+        } else if (c == ')' || c == '}' || c == ']') {
+            if (stack.length == 0) {
+                return false;
+            }
+            let top = stack.pop();
+            if (c == ')' && top != '(') { return false; }
+            if (c == '}' && top != '{') { return false; }
+            if (c == ']' && top != '[') { return false; }
+        }
+    }
+    return stack.length == 0;
+}
+
+let tests = ["({[]})", "({[}])", ""];
+for (t in tests) {
+    if (is_balanced(t)) {
+        print(`"${t}" -> balanced`);
+    } else {
+        print(`"${t}" -> not balanced`);
+    }
+}

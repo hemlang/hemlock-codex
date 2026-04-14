@@ -1,0 +1,30 @@
+// Rod Cutting Problem
+// Dynamic programming approach to find the maximum revenue
+// obtainable by cutting a rod into pieces and selling them.
+// prices[i] = price for a rod of length i.
+
+fn rod_cutting(prices, n) {
+    // dp[i] = maximum revenue for rod of length i
+    let dp = [];
+    for (let i = 0; i <= n; i++) {
+        dp.push(0);
+    }
+
+    for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= i; j++) {
+            if (j < prices.length) {
+                let candidate = prices[j] + dp[i - j];
+                if (candidate > dp[i]) {
+                    dp[i] = candidate;
+                }
+            }
+        }
+    }
+
+    return dp[n];
+}
+
+let prices = [0, 1, 5, 8, 9, 10, 17, 17, 20];
+let n = 8;
+let result = rod_cutting(prices, n);
+print(`max revenue: ${result}`);

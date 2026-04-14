@@ -1,0 +1,71 @@
+// Simple calculator REPL with predefined inputs
+
+let inputs = [
+    "2 + 3",
+    "10 * 4",
+    "100 / 7",
+    "50 - 18",
+    "2 + 3 * 4"
+];
+
+fn tokenize(expr) {
+    let tokens = [];
+    let num = "";
+    for (let i = 0; i < expr.length; i++) {
+        let ch = expr.char_at(i);
+        if (ch == ' ') {
+            if (num != "") {
+                tokens.push(num);
+                num = "";
+            }
+        } else if (ch == '+' || ch == '-' || ch == '*' || ch == '/') {
+            if (num != "") {
+                tokens.push(num);
+                num = "";
+            }
+            tokens.push(`${ch}`);
+        } else {
+            num = num + `${ch}`;
+        }
+    }
+    if (num != "") {
+        tokens.push(num);
+    }
+    return tokens;
+}
+
+fn evaluate(expr) {
+    let tokens = tokenize(expr);
+
+    // Simple left-to-right evaluation (no precedence for simplicity)
+    if (tokens.length == 0) { return 0; }
+
+    let result = f64(tokens[0]);
+    let i = 1;
+    while (i < tokens.length) {
+        let op = tokens[i];
+        let operand = f64(tokens[i + 1]);
+
+        if (op == "+") { result = result + operand; }
+        else if (op == "-") { result = result - operand; }
+        else if (op == "*") { result = result * operand; }
+        else if (op == "/") { result = result / operand; }
+
+        i = i + 2;
+    }
+
+    return result;
+}
+
+print("=== Simple Calculator ===");
+for (input in inputs) {
+    let result = evaluate(input);
+    // Format: if result is a whole number, show without decimal
+    let int_result = i64(result);
+    if (f64(int_result) == result) {
+        print(`> ${input} = ${int_result}`);
+    } else {
+        print(`> ${input} = ${result}`);
+    }
+}
+print("=== Done ===");

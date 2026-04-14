@@ -1,0 +1,32 @@
+// Python equivalent:
+// import json
+// data = json.loads('{"users": [{"name": "Alice", "age": 30, "active": true}, {"name": "Bob", "age": 25, "active": false}, {"name": "Charlie", "age": 35, "active": true}]}')
+// active_users = [u for u in data["users"] if u["active"]]
+// names = [u["name"] for u in active_users]
+// result = json.dumps({"active_names": names, "count": len(names)})
+// print(result)
+
+import { parse, stringify } from "@stdlib/json";
+
+let json_str = "{\"users\": [{\"name\": \"Alice\", \"age\": 30, \"active\": true}, {\"name\": \"Bob\", \"age\": 25, \"active\": false}, {\"name\": \"Charlie\", \"age\": 35, \"active\": true}]}";
+
+let data = parse(json_str);
+let users = data.users;
+
+// Filter active users
+let active = users.filter(fn(u) {
+    return u.active;
+});
+
+// Extract names
+let names = active.map(fn(u) {
+    return u.name;
+});
+
+// Build result object
+let result = {
+    active_names: names,
+    count: names.length
+};
+
+print(stringify(result));

@@ -1,0 +1,46 @@
+// Mini test runner framework
+
+let tests = [];
+let passed = 0;
+let failed = 0;
+
+fn add_test(name, actual, expected) {
+    tests.push({ name: name, actual: actual, expected: expected });
+}
+
+fn run_tests() {
+    print("=== Test Results ===");
+    for (t in tests) {
+        if (t.actual == t.expected) {
+            print(`  PASS: ${t.name}`);
+            passed++;
+        } else {
+            print(`  FAIL: ${t.name} (expected ${t.expected}, got ${t.actual})`);
+            failed++;
+        }
+    }
+    let total = passed + failed;
+    print(`\n${passed}/${total} tests passed`);
+    if (failed > 0) {
+        print(`${failed} test(s) failed`);
+    }
+}
+
+// String tests
+add_test("string length", "hello".length, 5);
+add_test("string contains", "hello world".contains("world"), true);
+add_test("string upper", "hello".to_upper(), "HELLO");
+
+// Array tests
+let arr = [1, 2, 3, 4, 5];
+add_test("array length", arr.length, 5);
+add_test("array first", arr.first(), 1);
+add_test("array last", arr.last(), 5);
+add_test("array contains", arr.contains(3), true);
+
+// Math tests
+add_test("addition", 2 + 3, 5);
+add_test("multiplication", 6 * 7, 42);
+add_test("boolean logic", true && !false, true);
+
+run_tests();

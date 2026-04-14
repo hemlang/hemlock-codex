@@ -1,0 +1,46 @@
+// Thread-Safe Queue using Channel as Backing Store
+// Multiple producers, single consumer.
+
+let queue = channel(100);
+
+async fn producer(id, queue, count) {
+    for (let i = 0; i < count; i++) {
+        queue.send(`p${id}-${i}`);
+    }
+}
+
+async fn consumer(queue, expected_count) {
+    let received = [];
+    for (let i = 0; i < expected_count; i++) {
+        let val = queue.recv();
+        received.push(val);
+    }
+    return received;
+}
+
+let num_producers = 3;
+let items_per_producer = 5;
+let total_items = num_producers * items_per_producer;
+
+// Start consumer first
+let cons = spawn(consumer, queue, total_items);
+
+// Start producers
+let producers = [];
+for (let i = 0; i < num_producers; i++) {
+    producers.push(spawn(producer, i, queue, items_per_producer));
+}
+
+// Wait for producers
+for (let i = 0; i < num_producers; i++) {
+    join(producers[i]);
+}
+
+// Wait for consumer
+let results = join(cons);
+queue.close();
+
+print(`consumed ${results.length} items`);
+// Sort for deterministic output
+results.sort();
+print(`values: ${results.join(" ")}`);

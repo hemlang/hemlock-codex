@@ -1,0 +1,32 @@
+// Producer-Consumer Pattern
+// Single producer sends values 1-10 through a channel,
+// single consumer receives and prints them all.
+
+let ch = channel(10);
+
+async fn producer(ch) {
+    for (let i = 1; i <= 10; i++) {
+        ch.send(i);
+    }
+    ch.close();
+}
+
+async fn consumer(ch) {
+    let results = [];
+    loop {
+        let val = ch.recv();
+        if (val == null) {
+            break;
+        }
+        results.push(val);
+    }
+    return results;
+}
+
+let p = spawn(producer, ch);
+let c = spawn(consumer, ch);
+
+join(p);
+let results = join(c);
+
+print(`received: ${results.join(" ")}`);

@@ -1,0 +1,44 @@
+// Python equivalent:
+// import csv, io
+// data = """name,age,score
+// Alice,30,85
+// Bob,25,92
+// Charlie,35,78
+// Diana,28,95
+// Eve,32,88"""
+//
+// reader = csv.DictReader(io.StringIO(data))
+// rows = [r for r in reader]
+// high_scorers = [r for r in rows if int(r['score']) >= 85]
+// avg = sum(int(r['score']) for r in high_scorers) / len(high_scorers)
+// print(f"High scorers (>=85): {len(high_scorers)}")
+// for r in high_scorers:
+//     print(f"  {r['name']}: {r['score']}")
+// print(f"Average score: {avg:.1f}")
+
+import { parse } from "@stdlib/csv";
+
+let data = "name,age,score\nAlice,30,85\nBob,25,92\nCharlie,35,78\nDiana,28,95\nEve,32,88";
+
+let rows = parse(data);
+
+// Filter high scorers (score >= 85)
+// parse() returns arrays of strings; rows[0] is header
+let header = rows[0];
+let data_rows = rows.slice(1);
+
+let high_scorers = data_rows.filter(fn(row) {
+    return i32(row[2]) >= 85;
+});
+
+print(`High scorers (>=85): ${high_scorers.length}`);
+for (row in high_scorers) {
+    print(`  ${row[0]}: ${row[2]}`);
+}
+
+// Compute average score of high scorers
+let total = high_scorers.reduce(fn(sum, row) {
+    return sum + i32(row[2]);
+}, 0);
+let avg = total / high_scorers.length;
+print(`Average score: ${avg}`);

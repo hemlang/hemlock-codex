@@ -1,0 +1,58 @@
+// Rust equivalent:
+// use std::sync::{Arc, Mutex};
+// use std::thread;
+//
+// fn main() {
+//     let counter = Arc::new(Mutex::new(0i32));
+//     let mut handles = vec![];
+//
+//     for _ in 0..4 {
+//         let counter = Arc::clone(&counter);
+//         let handle = thread::spawn(move || {
+//             for _ in 0..100 {
+//                 let mut num = counter.lock().unwrap();
+//                 *num += 1;
+//             }
+//         });
+//         handles.push(handle);
+//     }
+//
+//     for handle in handles {
+//         handle.join().unwrap();
+//     }
+//
+//     println!("final: {}", *counter.lock().unwrap());
+// }
+
+// In Hemlock, Arc<Mutex<T>> becomes an allocated pointer with atomic ops.
+// No ownership, no RAII — just raw atomics for thread-safe mutation.
+
+import { atomic_add_i32, atomic_load_i32, atomic_store_i32 } from "@stdlib/atomic";
+
+// Allocate shared counter (replaces Arc<Mutex<i32>>)
+let counter = alloc(4);
+atomic_store_i32(counter, 0);
+
+// Worker function: increment counter 100 times
+async fn increment(ptr) {
+    for (let i = 0; i < 100; i++) {
+        atomic_add_i32(ptr, 1);
+    }
+}
+
+// Spawn 4 threads (replaces thread::spawn with Arc::clone)
+let tasks = [];
+for (let i = 0; i < 4; i++) {
+    tasks.push(spawn(increment, counter));
+}
+
+// Join all threads (replaces handle.join().unwrap())
+for (let i = 0; i < tasks.length; i++) {
+    join(tasks[i]);
+}
+
+// Read final value (replaces counter.lock().unwrap())
+let result = atomic_load_i32(counter);
+print(`final: ${result}`);
+
+free(counter);

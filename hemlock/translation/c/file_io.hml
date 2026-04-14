@@ -1,0 +1,44 @@
+// C equivalent:
+// #include <stdio.h>
+// #include <string.h>
+//
+// int main() {
+//     const char *path = "/tmp/hemlock_test.txt";
+//     FILE *f = fopen(path, "w");
+//     fprintf(f, "Hello from C!\nLine 2\nLine 3\n");
+//     fclose(f);
+//
+//     f = fopen(path, "r");
+//     char buf[256];
+//     while (fgets(buf, sizeof(buf), f)) {
+//         printf("%s", buf);
+//     }
+//     fclose(f);
+//     remove(path);
+//     return 0;
+// }
+
+// In Hemlock, fopen/fclose become open/close from @stdlib/fs.
+// File objects have .read() and .write() methods.
+
+import { open, exists } from "@stdlib/fs";
+
+let path = "/tmp/hemlock_file_io_test.txt";
+
+// Write to file (like fopen with "w")
+let f = open(path, "w");
+f.write("Hello from Hemlock!\nLine 2\nLine 3\n");
+f.close();
+
+// Read back (like fopen with "r")
+let f2 = open(path, "r");
+let contents = f2.read();
+f2.close();
+
+write(contents);
+
+// Clean up temp file
+import { exec } from "@stdlib/process";
+exec("rm", [path]);
+
+print("file I/O complete");

@@ -1,0 +1,93 @@
+// Rust equivalent:
+// fn classify(n: i32) -> &'static str {
+//     match n {
+//         0 => "zero",
+//         1 | 2 | 3 => "small",
+//         n if n < 0 => "negative",
+//         n if n < 10 => "medium",
+//         n if n < 100 => "large",
+//         _ => "huge",
+//     }
+// }
+//
+// fn describe_pair(pair: (i32, i32)) -> String {
+//     match pair {
+//         (0, 0) => "origin".to_string(),
+//         (x, 0) => format!("x-axis at {}", x),
+//         (0, y) => format!("y-axis at {}", y),
+//         (x, y) if x == y => format!("diagonal at {}", x),
+//         (x, y) => format!("point ({}, {})", x, y),
+//     }
+// }
+//
+// fn main() {
+//     for n in [-5, 0, 2, 7, 42, 999] {
+//         println!("{}: {}", n, classify(n));
+//     }
+//     let pairs = [(0,0), (3,0), (0,7), (4,4), (2,5)];
+//     for (a, b) in pairs {
+//         println!("({},{}): {}", a, b, describe_pair((a,b)));
+//     }
+// }
+
+// In Hemlock, match works similarly to Rust: value matching, OR patterns,
+// guards, and variable binding are all supported.
+
+// Value matching with OR patterns and guards
+fn classify(n) {
+    return match (n) {
+        0 => "zero",
+        1 | 2 | 3 => "small",
+        x if x < 0 => "negative",
+        x if x < 10 => "medium",
+        x if x < 100 => "large",
+        x => "huge"
+    };
+}
+
+// Test classify
+let test_vals = [-5, 0, 2, 7, 42, 999];
+for (val in test_vals) {
+    print(`${val}: ${classify(val)}`);
+}
+
+// Variable binding in match
+fn describe_value(x) {
+    return match (x) {
+        0 => "nothing",
+        v if v > 0 && v <= 10 => `small positive: ${v}`,
+        v if v > 10 => `big positive: ${v}`,
+        v => `negative: ${v}`
+    };
+}
+
+print(`${describe_value(0)}`);
+print(`${describe_value(5)}`);
+print(`${describe_value(50)}`);
+print(`${describe_value(-3)}`);
+
+// Match on strings
+fn greet(lang) {
+    return match (lang) {
+        "en" | "english" => "Hello!",
+        "es" | "spanish" => "Hola!",
+        "fr" | "french" => "Bonjour!",
+        other => `Unknown language: ${other}`
+    };
+}
+
+print(greet("en"));
+print(greet("spanish"));
+print(greet("fr"));
+print(greet("de"));
+
+// Match as expression in variable assignment
+let score = 85;
+let grade = match (score) {
+    v if v >= 90 => "A",
+    v if v >= 80 => "B",
+    v if v >= 70 => "C",
+    v if v >= 60 => "D",
+    v => "F"
+};
+print(`score ${score}: grade ${grade}`);

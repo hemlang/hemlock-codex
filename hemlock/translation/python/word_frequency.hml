@@ -1,0 +1,38 @@
+// Python equivalent:
+// text = "the cat sat on the mat the cat"
+// words = text.split()
+// freq = {}
+// for w in words:
+//     freq[w] = freq.get(w, 0) + 1
+// for word, count in sorted(freq.items(), key=lambda x: -x[1]):
+//     print(f"{word}: {count}")
+
+import { HashMap } from "@stdlib/collections";
+
+let text = "the cat sat on the mat the cat";
+let words = text.split(" ");
+
+let freq = HashMap();
+for (w in words) {
+    if (freq.has(w)) {
+        freq.set(w, freq.get(w) + 1);
+    } else {
+        freq.set(w, 1);
+    }
+}
+
+// Collect into array of [word, count] pairs for sorting
+let keys = freq.keys();
+let pairs = [];
+for (k in keys) {
+    pairs.push([k, freq.get(k)]);
+}
+
+// Sort by count descending
+pairs.sort(fn(a, b) {
+    return b[1] - a[1];
+});
+
+for (pair in pairs) {
+    print(`${pair[0]}: ${pair[1]}`);
+}

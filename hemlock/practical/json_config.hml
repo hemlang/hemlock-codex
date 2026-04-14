@@ -1,0 +1,46 @@
+// JSON config loader with defaults and override
+import { parse, stringify, pretty } from "@stdlib/json";
+
+// Default configuration
+let defaults = {
+    host: "localhost",
+    port: 8080,
+    debug: false,
+    log_level: "info",
+    max_connections: 100,
+    timeout: 30
+};
+
+// Simulated user config (as if loaded from a file)
+let user_config_str = "{\"port\": 3000, \"debug\": true, \"log_level\": \"debug\"}";
+let user_config = parse(user_config_str);
+
+// Merge: user overrides defaults
+fn merge_config(base, overrides) {
+    let result = {
+        host: base.host,
+        port: base.port,
+        debug: base.debug,
+        log_level: base.log_level,
+        max_connections: base.max_connections,
+        timeout: base.timeout
+    };
+
+    if (overrides?.port != null) { result.port = overrides.port; }
+    if (overrides?.host != null) { result.host = overrides.host; }
+    if (overrides?.debug != null) { result.debug = overrides.debug; }
+    if (overrides?.log_level != null) { result.log_level = overrides.log_level; }
+    if (overrides?.max_connections != null) { result.max_connections = overrides.max_connections; }
+    if (overrides?.timeout != null) { result.timeout = overrides.timeout; }
+
+    return result;
+}
+
+let final_config = merge_config(defaults, user_config);
+
+print("=== Default Config ===");
+print(pretty(defaults));
+print("=== User Overrides ===");
+print(pretty(user_config));
+print("=== Final Config ===");
+print(pretty(final_config));

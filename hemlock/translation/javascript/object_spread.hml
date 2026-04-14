@@ -1,0 +1,27 @@
+// JavaScript equivalent:
+// const defaults = { host: "localhost", port: 8080, debug: false };
+// const userConfig = { port: 3000, debug: true };
+// const config = { ...defaults, ...userConfig, name: "myapp" };
+// console.log("host: " + config.host);
+// console.log("port: " + config.port);
+// console.log("debug: " + config.debug);
+// console.log("name: " + config.name);
+
+// In Hemlock, object spread syntax works the same way.
+// Later spreads override earlier fields, just like JavaScript.
+
+let defaults = { host: "localhost", port: 8080, debug: false };
+let user_config = { port: 3000, debug: true };
+
+// Spread merge — user_config overrides defaults, then name is added
+let config = { ...defaults, ...user_config, name: "myapp" };
+
+print(`host: ${config.host}`);
+print(`port: ${config.port}`);
+print(`debug: ${config.debug}`);
+print(`name: ${config.name}`);
+
+// Demonstrate creating a modified copy (immutable update pattern)
+let updated = { ...config, port: 9090 };
+print(`updated port: ${updated.port}`);
+print(`original port: ${config.port}`);

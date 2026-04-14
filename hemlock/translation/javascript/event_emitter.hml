@@ -1,0 +1,37 @@
+// JavaScript equivalent:
+// const EventEmitter = require('events');
+// const emitter = new EventEmitter();
+// emitter.on('data', (msg) => console.log("received: " + msg));
+// emitter.on('data', (msg) => console.log("logged: " + msg));
+// emitter.emit('data', 'hello');
+// emitter.emit('data', 'world');
+// emitter.emit('done', null);
+
+// In Hemlock, there's no EventEmitter. Use channels instead.
+// A channel is a typed, bounded, thread-safe queue.
+
+import { sleep } from "@stdlib/time";
+
+let ch = channel(10);
+
+// Subscriber task — reads events from channel
+async fn subscriber(ch) {
+    loop {
+        let msg = ch.recv();
+        if (msg == "done") {
+            break;
+        }
+        print(`received: ${msg}`);
+    }
+}
+
+let sub = spawn(subscriber, ch);
+
+// Publisher sends events
+ch.send("hello");
+ch.send("world");
+ch.send("hemlock");
+ch.send("done");
+
+join(sub);
+print("all events processed");

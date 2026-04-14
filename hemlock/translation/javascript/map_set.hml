@@ -1,0 +1,51 @@
+// JavaScript equivalent:
+// const map = new Map();
+// map.set("name", "hemlock");
+// map.set("version", "2.0");
+// map.set("type", "language");
+// console.log("has name: " + map.has("name"));
+// console.log("name: " + map.get("name"));
+// map.delete("type");
+// console.log("has type: " + map.has("type"));
+// console.log("keys: " + [...map.keys()].join(", "));
+//
+// const set = new Set();
+// set.add("apple");
+// set.add("banana");
+// set.add("apple");  // duplicate ignored
+// console.log("set size: " + set.size);
+// console.log("has apple: " + set.has("apple"));
+
+// In Hemlock, Map/Set aren't built-in literals.
+// Import HashMap and Set from @stdlib/collections.
+
+import { HashMap, Set } from "@stdlib/collections";
+
+// HashMap — equivalent to JavaScript's Map
+let map = HashMap();
+map.set("name", "hemlock");
+map.set("version", "2.0");
+map.set("type", "language");
+
+print(`has name: ${map.has("name")}`);
+print(`name: ${map.get("name")}`);
+
+map.delete("type");
+print(`has type: ${map.has("type")}`);
+
+let keys = map.keys();
+keys.sort(fn(a, b) { if (a < b) { return -1; } if (a > b) { return 1; } return 0; });
+print(`keys: ${keys.join(", ")}`);
+
+// Set — equivalent to JavaScript's Set
+let s = Set();
+s.add("apple");
+s.add("banana");
+s.add("apple");  // duplicate ignored
+
+print(`set size: ${s.size}`);
+print(`has apple: ${s.has("apple")}`);
+
+let vals = s.values();
+vals.sort(fn(a, b) { if (a < b) { return -1; } if (a > b) { return 1; } return 0; });
+print(`values: ${vals.join(", ")}`);

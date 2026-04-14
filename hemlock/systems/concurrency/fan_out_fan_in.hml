@@ -1,0 +1,47 @@
+// Fan-Out Fan-In Pattern
+// Distribute numbers 1-20 across 4 workers that square them,
+// collect results, sort, and print.
+
+let work_ch = channel(20);
+let result_ch = channel(20);
+
+async fn worker(work_ch, result_ch) {
+    loop {
+        let val = work_ch.recv();
+        if (val == null) {
+            break;
+        }
+        result_ch.send(val * val);
+    }
+}
+
+// Send all work items
+for (let i = 1; i <= 20; i++) {
+    work_ch.send(i);
+}
+work_ch.close();
+
+// Spawn 4 workers
+let workers = [];
+for (let i = 0; i < 4; i++) {
+    workers.push(spawn(worker, work_ch, result_ch));
+}
+
+// Wait for all workers to finish
+for (let i = 0; i < 4; i++) {
+    join(workers[i]);
+}
+result_ch.close();
+
+// Collect results
+let results = [];
+loop {
+    let val = result_ch.recv();
+    if (val == null) {
+        break;
+    }
+    results.push(val);
+}
+
+results.sort();
+print(`results: ${results.join(" ")}`);

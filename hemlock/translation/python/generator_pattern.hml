@@ -1,0 +1,33 @@
+// Python equivalent:
+// def fibonacci():
+//     a, b = 0, 1
+//     while True:
+//         yield a
+//         a, b = b, a + b
+//
+// gen = fibonacci()
+// for _ in range(10):
+//     print(next(gen), end=" ")
+// Output: 0 1 1 2 3 5 8 13 21 34
+
+// In Hemlock, generators become closures that maintain state.
+// Each call to the returned function yields the next value.
+
+fn fibonacci_generator() {
+    let a = 0;
+    let b = 1;
+    return fn() {
+        let current = a;
+        let next_val = a + b;
+        a = b;
+        b = next_val;
+        return current;
+    };
+}
+
+let fib = fibonacci_generator();
+let results = [];
+for (let i = 0; i < 10; i++) {
+    results.push(fib());
+}
+print(results.join(" "));

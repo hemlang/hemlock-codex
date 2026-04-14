@@ -1,0 +1,109 @@
+// Go equivalent:
+// package main
+//
+// import (
+//     "errors"
+//     "fmt"
+// )
+//
+// func divide(a, b float64) (float64, error) {
+//     if b == 0 {
+//         return 0, errors.New("division by zero")
+//     }
+//     return a / b, nil
+// }
+//
+// func parsePositive(s string) (int, error) {
+//     n := 0
+//     for _, ch := range s {
+//         if ch < '0' || ch > '9' {
+//             return 0, fmt.Errorf("invalid character: %c", ch)
+//         }
+//         n = n*10 + int(ch-'0')
+//     }
+//     if n <= 0 {
+//         return 0, errors.New("must be positive")
+//     }
+//     return n, nil
+// }
+//
+// func main() {
+//     if result, err := divide(10, 3); err != nil {
+//         fmt.Println("error:", err)
+//     } else {
+//         fmt.Printf("10 / 3 = %.2f\n", result)
+//     }
+//
+//     if _, err := divide(10, 0); err != nil {
+//         fmt.Println("error:", err)
+//     }
+//
+//     if n, err := parsePositive("42"); err != nil {
+//         fmt.Println("error:", err)
+//     } else {
+//         fmt.Printf("parsed: %d\n", n)
+//     }
+//
+//     if _, err := parsePositive("12x4"); err != nil {
+//         fmt.Println("error:", err)
+//     }
+// }
+
+// In Hemlock, Go's (value, error) return pattern maps to
+// try/catch with throw. Functions throw on failure instead
+// of returning error tuples.
+
+import { to_fixed } from "@stdlib/decimal";
+
+fn divide(a, b) {
+    if (b == 0) {
+        throw "division by zero";
+    }
+    return a / b;
+}
+
+fn parse_positive(s) {
+    let n = 0;
+    let chars = s.chars();
+    for (ch in chars) {
+        if (ch < '0' || ch > '9') {
+            throw `invalid character: ${ch}`;
+        }
+        let digit = i32(ch) - i32('0');
+        n = n * 10 + digit;
+    }
+    if (n <= 0) {
+        throw "must be positive";
+    }
+    return n;
+}
+
+// Success case: divide
+try {
+    let result = divide(10, 3);
+    print(`10 / 3 = ${to_fixed(result, 2)}`);
+} catch (e) {
+    print(`error: ${e}`);
+}
+
+// Error case: divide by zero
+try {
+    divide(10, 0);
+} catch (e) {
+    print(`error: ${e}`);
+}
+
+// Success case: parse
+try {
+    let n = parse_positive("42");
+    print(`parsed: ${n}`);
+} catch (e) {
+    print(`error: ${e}`);
+}
+
+// Error case: invalid character
+try {
+    parse_positive("12x4");
+} catch (e) {
+    print(`error: ${e}`);
+}

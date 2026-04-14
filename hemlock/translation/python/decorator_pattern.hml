@@ -1,0 +1,46 @@
+// Python equivalent:
+// def logged(func):
+//     def wrapper(*args, **kwargs):
+//         print(f"Calling {func.__name__}")
+//         result = func(*args, **kwargs)
+//         print(f"{func.__name__} returned {result}")
+//         return result
+//     return wrapper
+//
+// @logged
+// def add(a, b):
+//     return a + b
+//
+// @logged
+// def multiply(a, b):
+//     return a * b
+//
+// add(3, 4)
+// multiply(5, 6)
+
+// In Hemlock, decorators become higher-order functions.
+// We wrap a function and return a new function with added behavior.
+
+fn logged(name, func) {
+    return fn(a, b) {
+        print(`Calling ${name}`);
+        let result = func(a, b);
+        print(`${name} returned ${result}`);
+        return result;
+    };
+}
+
+fn add(a, b) {
+    return a + b;
+}
+
+fn multiply(a, b) {
+    return a * b;
+}
+
+// Apply the "decorator" by wrapping
+let logged_add = logged("add", add);
+let logged_multiply = logged("multiply", multiply);
+
+logged_add(3, 4);
+logged_multiply(5, 6);

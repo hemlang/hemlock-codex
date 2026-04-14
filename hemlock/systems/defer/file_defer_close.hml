@@ -1,0 +1,16 @@
+import { write_file, open } from "@stdlib/fs";
+
+fn main() {
+    let path = "/tmp/hemlock_defer_test.txt";
+    write_file(path, "hello from defer");
+
+    let f = open(path, "r");
+    defer f.close();
+
+    let contents = f.read();
+    if (contents == "hello from defer") {
+        print("wrote and read back successfully");
+    }
+}
+
+main();

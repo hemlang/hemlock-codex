@@ -1,0 +1,49 @@
+// Barrier Synchronization Pattern
+// 4 tasks reach a barrier, all proceed after the last arrives.
+// Uses an atomic counter to track arrivals.
+
+import { atomic_add_i32, atomic_load_i32 } from "@stdlib/atomic";
+
+let counter = alloc(4);
+memset(counter, 0, 4);
+
+let done_ch = channel(4);
+
+async fn barrier_task(id, counter, total, done_ch) {
+    // Simulate some work before reaching the barrier
+    let prev = atomic_add_i32(counter, 1);
+    let arrived = prev + 1;
+
+    // Spin-wait until all tasks have arrived
+    loop {
+        let current = atomic_load_i32(counter);
+        if (current >= total) {
+            break;
+        }
+    }
+
+    // All tasks have passed the barrier
+    done_ch.send(id);
+}
+
+let num_tasks = 4;
+let tasks = [];
+for (let i = 0; i < num_tasks; i++) {
+    tasks.push(spawn(barrier_task, i, counter, num_tasks, done_ch));
+}
+
+for (let i = 0; i < num_tasks; i++) {
+    join(tasks[i]);
+}
+
+// Collect all done signals
+let count = 0;
+for (let i = 0; i < num_tasks; i++) {
+    done_ch.recv();
+    count++;
+}
+done_ch.close();
+
+free(counter);
+
+print(`all ${count} tasks passed barrier`);

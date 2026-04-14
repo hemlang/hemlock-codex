@@ -1,0 +1,29 @@
+// Python equivalent:
+// with open("/tmp/hemlock_ctx.txt", "w") as f:
+//     f.write("hello from context manager")
+// with open("/tmp/hemlock_ctx.txt", "r") as f:
+//     content = f.read()
+//     print(content)
+
+// In Hemlock, `defer` replaces Python's `with` statement.
+// defer guarantees cleanup when the enclosing function returns.
+
+import { open, write_file } from "@stdlib/fs";
+
+fn write_with_defer() {
+    let path = "/tmp/hemlock_ctx.txt";
+    let f = open(path, "w");
+    defer f.close();
+    f.write("hello from context manager");
+}
+
+fn read_with_defer() {
+    let path = "/tmp/hemlock_ctx.txt";
+    let f = open(path, "r");
+    defer f.close();
+    let content = f.read();
+    print(content);
+}
+
+write_with_defer();
+read_with_defer();

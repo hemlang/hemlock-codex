@@ -1,0 +1,38 @@
+// Matrix Chain Multiplication
+// Dynamic programming approach to find the optimal way to
+// parenthesize matrix multiplications to minimize scalar operations.
+
+fn matrix_chain(dims) {
+    let n = dims.length - 1;
+
+    // dp[i][j] = minimum multiplications to compute matrices i..j
+    let dp = [];
+    for (let i = 0; i < n; i++) {
+        let row = [];
+        for (let j = 0; j < n; j++) {
+            row.push(0);
+        }
+        dp.push(row);
+    }
+
+    // chain length l from 2 to n
+    for (let l = 2; l <= n; l++) {
+        for (let i = 0; i <= n - l; i++) {
+            let j = i + l - 1;
+            dp[i][j] = 999999999;
+            // Try all split points
+            for (let k = i; k < j; k++) {
+                let cost = dp[i][k] + dp[k + 1][j] + dims[i] * dims[k + 1] * dims[j + 1];
+                if (cost < dp[i][j]) {
+                    dp[i][j] = cost;
+                }
+            }
+        }
+    }
+
+    return dp[0][n - 1];
+}
+
+let dims = [10, 30, 5, 60];
+let result = matrix_chain(dims);
+print(`min multiplications: ${result}`);

@@ -1,0 +1,46 @@
+// CLI tool with argument parsing (using defaults since no real args)
+
+let tool_name = "hemlock-tool";
+let version = "1.0.0";
+
+// Simulate parsed options with defaults
+let config = {
+    verbose: false,
+    output: "stdout",
+    format: "text",
+    count: 10
+};
+
+// Simulate arg parsing logic
+fn parse_option(key, value, cfg) {
+    if (key == "--verbose" || key == "-v") {
+        cfg.verbose = true;
+    } else if (key == "--output" || key == "-o") {
+        cfg.output = value;
+    } else if (key == "--format" || key == "-f") {
+        cfg.format = value;
+    } else if (key == "--count" || key == "-n") {
+        cfg.count = i32(value);
+    }
+    return cfg;
+}
+
+// Simulate parsing some args
+let simulated_args = [
+    ["--verbose", ""],
+    ["--output", "result.txt"],
+    ["--format", "json"],
+    ["--count", "25"]
+];
+
+for (arg in simulated_args) {
+    config = parse_option(arg[0], arg[1], config);
+}
+
+print(`${tool_name} v${version}`);
+print("Parsed configuration:");
+print(`  verbose: ${config.verbose}`);
+print(`  output:  ${config.output}`);
+print(`  format:  ${config.format}`);
+print(`  count:   ${config.count}`);
+print("Ready to process.");

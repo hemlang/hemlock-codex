@@ -1,0 +1,45 @@
+// Simple bump allocator from a large alloc'd block
+let ARENA_SIZE = 1024;
+let arena = alloc(ARENA_SIZE);
+let offset = 0;
+
+fn arena_alloc(size: i32) {
+    if (offset + size > ARENA_SIZE) {
+        print("arena out of memory!");
+        return null;
+    }
+    let p = ptr_offset(arena, offset, 1);
+    offset = offset + size;
+    return p;
+}
+
+fn arena_reset() {
+    offset = 0;
+}
+
+// Allocate several i32 slots (4 bytes each)
+let a = arena_alloc(4);
+let b = arena_alloc(4);
+let c = arena_alloc(4);
+let d = arena_alloc(4);
+let e = arena_alloc(4);
+
+// Write values
+ptr_write_i32(a, 100);
+ptr_write_i32(b, 200);
+ptr_write_i32(c, 300);
+ptr_write_i32(d, 400);
+ptr_write_i32(e, 500);
+
+// Read them back
+print(`slot 0: ${ptr_deref_i32(a)}`);
+print(`slot 1: ${ptr_deref_i32(b)}`);
+print(`slot 2: ${ptr_deref_i32(c)}`);
+print(`slot 3: ${ptr_deref_i32(d)}`);
+print(`slot 4: ${ptr_deref_i32(e)}`);
+
+print(`arena used: ${offset} bytes`);
+
+// Free the whole arena at once
+free(arena);
+print("arena freed");

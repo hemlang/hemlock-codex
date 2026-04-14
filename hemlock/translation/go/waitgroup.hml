@@ -1,0 +1,42 @@
+// Go equivalent:
+// package main
+//
+// import (
+//     "fmt"
+//     "sync"
+// )
+//
+// func task(id int, wg *sync.WaitGroup) {
+//     defer wg.Done()
+//     fmt.Printf("task %d done\n", id)
+// }
+//
+// func main() {
+//     var wg sync.WaitGroup
+//     for i := 1; i <= 5; i++ {
+//         wg.Add(1)
+//         go task(i, &wg)
+//     }
+//     wg.Wait()
+//     fmt.Println("all 5 tasks done")
+// }
+
+// In Hemlock, sync.WaitGroup is replaced by collecting task handles
+// in an array and calling join() on each. This is simpler and more
+// explicit than WaitGroup's Add/Done/Wait pattern.
+
+async fn do_task(id) {
+    print(`task ${id} done`);
+}
+
+let tasks = [];
+for (let i = 1; i <= 5; i++) {
+    tasks.push(spawn(do_task, i));
+}
+
+// join() replaces wg.Wait() — wait for all tasks
+for (let i = 0; i < tasks.length; i++) {
+    join(tasks[i]);
+}
+
+print("all 5 tasks done");

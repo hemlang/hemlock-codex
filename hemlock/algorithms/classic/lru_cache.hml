@@ -1,0 +1,69 @@
+import { HashMap } from "@stdlib/collections";
+
+fn make_lru(capacity) {
+    let head = { key: null, val: null, prev: null, next: null };
+    let tail = { key: null, val: null, prev: null, next: null };
+    head.next = tail;
+    tail.prev = head;
+    return { capacity: capacity, map: HashMap(), head: head, tail: tail, size: 0 };
+}
+
+fn remove_node(node) {
+    node.prev.next = node.next;
+    node.next.prev = node.prev;
+}
+
+fn add_to_front(cache, node) {
+    node.next = cache.head.next;
+    node.prev = cache.head;
+    cache.head.next.prev = node;
+    cache.head.next = node;
+}
+
+fn lru_get(cache, key) {
+    let skey = `${key}`;
+    if (cache.map.has(skey)) {
+        let node = cache.map.get(skey);
+        remove_node(node);
+        add_to_front(cache, node);
+        print(`get(${key}) -> ${node.val} (hit)`);
+        return node.val;
+    }
+    print(`get(${key}) -> miss`);
+    return null;
+}
+
+fn lru_put(cache, key, val) {
+    let skey = `${key}`;
+    if (cache.map.has(skey)) {
+        let node = cache.map.get(skey);
+        node.val = val;
+        remove_node(node);
+        add_to_front(cache, node);
+        print(`put(${key}, ${val}) -> updated`);
+    } else {
+        let node = { key: skey, val: val, prev: null, next: null };
+        cache.map.set(skey, node);
+        add_to_front(cache, node);
+        cache.size++;
+        if (cache.size > cache.capacity) {
+            let evict = cache.tail.prev;
+            remove_node(evict);
+            cache.map.delete(evict.key);
+            cache.size--;
+            print(`put(${key}, ${val}) -> added, evicted key ${evict.key}`);
+        } else {
+            print(`put(${key}, ${val}) -> added`);
+        }
+    }
+}
+
+let cache = make_lru(3);
+lru_put(cache, 1, 10);
+lru_put(cache, 2, 20);
+lru_put(cache, 3, 30);
+lru_get(cache, 2);
+lru_put(cache, 4, 40);
+lru_get(cache, 1);
+lru_get(cache, 3);
+lru_get(cache, 4);

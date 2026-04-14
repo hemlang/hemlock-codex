@@ -1,0 +1,83 @@
+// Rust equivalent:
+// fn create_data() -> Vec<i32> {
+//     vec![10, 20, 30, 40, 50]
+// }
+//
+// fn sum_data(data: &[i32]) -> i32 {
+//     data.iter().sum()
+// }
+//
+// fn transform_data(mut data: Vec<i32>) -> Vec<i32> {
+//     // Takes ownership, modifies, returns
+//     for val in data.iter_mut() {
+//         *val *= 2;
+//     }
+//     data
+// }
+//
+// fn main() {
+//     let data = create_data();           // data owned here
+//     let total = sum_data(&data);        // borrow (read-only)
+//     println!("sum: {}", total);
+//     let data = transform_data(data);    // move into transform, get back
+//     println!("transformed: {:?}", data);
+//     // data dropped automatically at end of scope
+// }
+
+// In Hemlock, there is no ownership system. You manually allocate,
+// pass pointers, and free when done. The programmer manages lifetimes.
+
+let count = 5;
+let stride = 4;
+
+fn create_data() {
+    let p = alloc(count * stride);
+    let vals = [10, 20, 30, 40, 50];
+    for (let i = 0; i < count; i++) {
+        ptr_write_i32(ptr_offset(p, i, stride), vals[i]);
+    }
+    return p;
+}
+
+// "Borrowing" = just passing the pointer (caller keeps ownership)
+fn sum_data(p) {
+    let total = 0;
+    for (let i = 0; i < count; i++) {
+        total += ptr_deref_i32(ptr_offset(p, i, stride));
+    }
+    return total;
+}
+
+// "Move" = caller passes pointer, callee takes responsibility
+fn transform_data(p) {
+    for (let i = 0; i < count; i++) {
+        let loc = ptr_offset(p, i, stride);
+        let val = ptr_deref_i32(loc);
+        ptr_write_i32(loc, val * 2);
+    }
+    return p;
+}
+
+fn read_all(p) {
+    let result = [];
+    for (let i = 0; i < count; i++) {
+        result.push(ptr_deref_i32(ptr_offset(p, i, stride)));
+    }
+    return result;
+}
+
+// Create (allocate)
+let data = create_data();
+print(`created: ${read_all(data)}`);
+
+// Borrow (read-only access, caller keeps pointer)
+let total = sum_data(data);
+print(`sum: ${total}`);
+
+// Move (pass pointer, receive it back transformed)
+data = transform_data(data);
+print(`transformed: ${read_all(data)}`);
+
+// Free (manual cleanup — no RAII, no Drop trait)
+free(data);
+print("freed");

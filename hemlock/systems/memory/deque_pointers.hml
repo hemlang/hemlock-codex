@@ -1,0 +1,151 @@
+// Double-ended queue using alloc'd nodes
+// Node layout: 4 bytes (i32 value) + 4 padding + 8 bytes (prev ptr) + 8 bytes (next ptr) = 24 bytes
+
+let NODE_SIZE = 24;
+let dq_head = null;
+let dq_tail = null;
+let dq_size = 0;
+
+fn make_node(val: i32) {
+    let node = alloc(NODE_SIZE);
+    ptr_write_i32(node, val);
+    // Zero out prev and next pointer slots
+    let prev_slot = ptr_offset(node, 8, 1);
+    ptr_write_i64(prev_slot, 0);
+    let next_slot = ptr_offset(node, 16, 1);
+    ptr_write_i64(next_slot, 0);
+    return node;
+}
+
+fn node_val(node) {
+    return ptr_deref_i32(node);
+}
+
+fn set_prev(node, prev) {
+    let slot = ptr_offset(node, 8, 1);
+    if (prev == null) {
+        ptr_write_i64(slot, 0);
+    } else {
+        ptr_write_ptr(slot, prev);
+    }
+}
+
+fn get_prev(node) {
+    let slot = ptr_offset(node, 8, 1);
+    let raw = ptr_deref_i64(slot);
+    if (raw == 0) { return null; }
+    return ptr_deref_ptr(slot);
+}
+
+fn set_next(node, nxt) {
+    let slot = ptr_offset(node, 16, 1);
+    if (nxt == null) {
+        ptr_write_i64(slot, 0);
+    } else {
+        ptr_write_ptr(slot, nxt);
+    }
+}
+
+fn get_next(node) {
+    let slot = ptr_offset(node, 16, 1);
+    let raw = ptr_deref_i64(slot);
+    if (raw == 0) { return null; }
+    return ptr_deref_ptr(slot);
+}
+
+fn push_front(val: i32) {
+    let node = make_node(val);
+    if (dq_head == null) {
+        dq_head = node;
+        dq_tail = node;
+    } else {
+        set_next(node, dq_head);
+        set_prev(dq_head, node);
+        dq_head = node;
+    }
+    dq_size++;
+    print(`push_front: ${val}`);
+}
+
+fn push_back(val: i32) {
+    let node = make_node(val);
+    if (dq_tail == null) {
+        dq_head = node;
+        dq_tail = node;
+    } else {
+        set_prev(node, dq_tail);
+        set_next(dq_tail, node);
+        dq_tail = node;
+    }
+    dq_size++;
+    print(`push_back: ${val}`);
+}
+
+fn pop_front() {
+    if (dq_head == null) {
+        print("deque empty");
+        return null;
+    }
+    let node = dq_head;
+    let val = node_val(node);
+    let nxt = get_next(node);
+    if (nxt != null) {
+        set_prev(nxt, null);
+    } else {
+        dq_tail = null;
+    }
+    dq_head = nxt;
+    free(node);
+    dq_size--;
+    print(`pop_front: ${val}`);
+    return val;
+}
+
+fn pop_back() {
+    if (dq_tail == null) {
+        print("deque empty");
+        return null;
+    }
+    let node = dq_tail;
+    let val = node_val(node);
+    let prv = get_prev(node);
+    if (prv != null) {
+        set_next(prv, null);
+    } else {
+        dq_head = null;
+    }
+    dq_tail = prv;
+    free(node);
+    dq_size--;
+    print(`pop_back: ${val}`);
+    return val;
+}
+
+fn print_deque() {
+    write("deque:");
+    let cur = dq_head;
+    while (cur != null) {
+        write(` ${node_val(cur)}`);
+        cur = get_next(cur);
+    }
+    print("");
+}
+
+// Demo
+push_front(1);
+push_front(2);
+push_back(3);
+push_back(4);
+print_deque();
+print(`size: ${dq_size}`);
+
+pop_front();
+pop_back();
+print_deque();
+print(`size: ${dq_size}`);
+
+// Clean up remaining nodes
+while (dq_head != null) {
+    pop_front();
+}
+print("deque cleared");

@@ -1,0 +1,36 @@
+// Longest Increasing Subsequence (LIS)
+// Dynamic programming O(n^2) approach to find the length of
+// the longest strictly increasing subsequence.
+
+fn lis(arr) {
+    let n = arr.length;
+    if (n == 0) { return 0; }
+
+    // dp[i] = length of LIS ending at index i
+    let dp = [];
+    for (let i = 0; i < n; i++) {
+        dp.push(1);
+    }
+
+    for (let i = 1; i < n; i++) {
+        for (let j = 0; j < i; j++) {
+            if (arr[j] < arr[i] && dp[j] + 1 > dp[i]) {
+                dp[i] = dp[j] + 1;
+            }
+        }
+    }
+
+    // Find maximum value in dp
+    let max_len = 0;
+    for (let i = 0; i < n; i++) {
+        if (dp[i] > max_len) {
+            max_len = dp[i];
+        }
+    }
+
+    return max_len;
+}
+
+let arr = [10, 9, 2, 5, 3, 7, 101, 18];
+let result = lis(arr);
+print(`lis length: ${result}`);

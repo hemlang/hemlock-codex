@@ -1,0 +1,51 @@
+// Map-Reduce Pattern
+// Map: square each number across workers
+// Reduce: sum all squares
+// Input: [1, 2, 3, 4, 5, 6, 7, 8]
+// Expected: 1+4+9+16+25+36+49+64 = 204
+
+let data = [1, 2, 3, 4, 5, 6, 7, 8];
+
+async fn map_worker(chunk) {
+    let results = [];
+    for (let i = 0; i < chunk.length; i++) {
+        results.push(chunk[i] * chunk[i]);
+    }
+    return results;
+}
+
+async fn reduce_worker(values) {
+    let sum = 0;
+    for (let i = 0; i < values.length; i++) {
+        sum = sum + values[i];
+    }
+    return sum;
+}
+
+// Split data into 4 chunks of 2
+let chunks = [];
+let chunk_size = 2;
+let i = 0;
+while (i < data.length) {
+    chunks.push(data.slice(i, i + chunk_size));
+    i = i + chunk_size;
+}
+
+// Map phase: spawn workers for each chunk
+let map_tasks = [];
+for (let i = 0; i < chunks.length; i++) {
+    map_tasks.push(spawn(map_worker, chunks[i]));
+}
+
+// Collect mapped results
+let all_squares = [];
+for (let i = 0; i < map_tasks.length; i++) {
+    let result = join(map_tasks[i]);
+    all_squares = all_squares.concat(result);
+}
+
+// Reduce phase
+let reduce_task = spawn(reduce_worker, all_squares);
+let total = join(reduce_task);
+
+print(`sum of squares: ${total}`);

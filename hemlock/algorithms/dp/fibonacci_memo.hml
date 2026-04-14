@@ -1,0 +1,20 @@
+// Fibonacci with Memoization
+// Uses an object as a cache to avoid redundant computation.
+// Bottom-up iterative approach for efficiency.
+
+fn fibonacci(n) {
+    // Use bottom-up DP with object cache
+    let memo = {};
+    memo[0] = 0;
+    memo[1] = 1;
+
+    for (let i = 2; i <= n; i++) {
+        memo[i] = memo[i - 1] + memo[i - 2];
+    }
+
+    return memo[n];
+}
+
+let n = 40;
+let result = fibonacci(n);
+print(`fib(${n}): ${result}`);

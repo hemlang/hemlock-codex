@@ -1,0 +1,23 @@
+let cleaned = false;
+
+fn cleanup() {
+    cleaned = true;
+    print("resource cleaned up");
+}
+
+fn risky_operation() {
+    let p = alloc(64);
+    defer cleanup();
+    defer free(p);
+    throw "something went wrong";
+}
+
+fn main() {
+    try {
+        risky_operation();
+    } catch (e) {
+        print("error handled");
+    }
+}
+
+main();

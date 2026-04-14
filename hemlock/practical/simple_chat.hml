@@ -1,0 +1,40 @@
+// Chat pattern: two users exchange messages via channels
+
+let alice_ch = channel(10);
+let bob_ch = channel(10);
+
+async fn alice(send_ch, recv_ch) {
+    send_ch.send("Hi Bob! How are you?");
+    let msg = recv_ch.recv();
+    print(`Alice received: ${msg}`);
+
+    send_ch.send("I'm working on a Hemlock project!");
+    msg = recv_ch.recv();
+    print(`Alice received: ${msg}`);
+
+    send_ch.send("Thanks! Talk later.");
+    msg = recv_ch.recv();
+    print(`Alice received: ${msg}`);
+}
+
+async fn bob(send_ch, recv_ch) {
+    let msg = recv_ch.recv();
+    print(`Bob received: ${msg}`);
+    send_ch.send("Hey Alice! I'm great, you?");
+
+    msg = recv_ch.recv();
+    print(`Bob received: ${msg}`);
+    send_ch.send("That sounds awesome!");
+
+    msg = recv_ch.recv();
+    print(`Bob received: ${msg}`);
+    send_ch.send("Bye Alice!");
+}
+
+let a = spawn(alice, bob_ch, alice_ch);
+let b = spawn(bob, alice_ch, bob_ch);
+
+join(a);
+join(b);
+
+print("Chat ended.");

@@ -1,0 +1,69 @@
+// Python equivalent:
+// class BankAccount:
+//     def __init__(self, owner, balance=0):
+//         self.owner = owner
+//         self.balance = balance
+//     def deposit(self, amount):
+//         self.balance += amount
+//         return self.balance
+//     def withdraw(self, amount):
+//         if amount > self.balance:
+//             raise ValueError("Insufficient funds")
+//         self.balance -= amount
+//         return self.balance
+//     def get_balance(self):
+//         return self.balance
+//
+// acct = BankAccount("Alice", 100)
+// acct.deposit(50)
+// acct.withdraw(30)
+// print(f"Balance: {acct.get_balance()}")
+
+// In Hemlock, Python classes become `define` + standalone functions.
+// The object is passed explicitly (no implicit `self`).
+
+define BankAccount {
+    owner: string,
+    balance: i32
+}
+
+fn new_account(owner, balance) {
+    let acct: BankAccount = { owner: owner, balance: balance };
+    return acct;
+}
+
+fn deposit(acct, amount) {
+    acct.balance = acct.balance + amount;
+    return acct.balance;
+}
+
+fn withdraw(acct, amount) {
+    if (amount > acct.balance) {
+        throw "Insufficient funds";
+    }
+    acct.balance = acct.balance - amount;
+    return acct.balance;
+}
+
+fn get_balance(acct) {
+    return acct.balance;
+}
+
+let acct = new_account("Alice", 100);
+print(`Owner: ${acct.owner}`);
+print(`Initial balance: ${get_balance(acct)}`);
+
+deposit(acct, 50);
+print(`After deposit 50: ${get_balance(acct)}`);
+
+withdraw(acct, 30);
+print(`After withdraw 30: ${get_balance(acct)}`);
+
+// Test error handling
+try {
+    withdraw(acct, 500);
+} catch (e) {
+    print(`Error: ${e}`);
+}
+
+print(`Final balance: ${get_balance(acct)}`);

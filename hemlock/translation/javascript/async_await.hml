@@ -1,0 +1,47 @@
+// JavaScript equivalent:
+// function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+// async function pipeline() {
+//     console.log("step 1: fetch data");
+//     await delay(100);
+//     console.log("step 2: process data");
+//     await delay(100);
+//     console.log("step 3: save results");
+//     await delay(100);
+//     console.log("done");
+// }
+// pipeline();
+
+// In Hemlock, there's no Promise — use spawn/join and sleep directly.
+// async fn declares a function that can be spawned as a task.
+
+import { sleep } from "@stdlib/time";
+
+async fn fetch_data() {
+    print("step 1: fetch data");
+    sleep(0.05);
+    return "raw data";
+}
+
+async fn process_data(data) {
+    print("step 2: process data");
+    sleep(0.05);
+    return "processed";
+}
+
+async fn save_results(data) {
+    print("step 3: save results");
+    sleep(0.05);
+    return "saved";
+}
+
+// Chain async operations sequentially
+let t1 = spawn(fetch_data);
+let data = join(t1);
+
+let t2 = spawn(process_data, data);
+let processed = join(t2);
+
+let t3 = spawn(save_results, processed);
+let status = join(t3);
+
+print("done");

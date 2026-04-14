@@ -1,0 +1,71 @@
+// URL shortener using in-memory object maps
+import { divi } from "@stdlib/math";
+
+let url_to_short = {};
+let short_to_url = {};
+let counter = 1000;
+
+fn encode_id(id) {
+    let chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    let n = id;
+    while (n > 0) {
+        let rem = n % 62;
+        let ch = chars.char_at(rem);
+        result = `${ch}${result}`;
+        n = divi(n - rem, 62);
+    }
+    return result;
+}
+
+fn shorten(url) {
+    // Check if already shortened
+    if (url_to_short[url] != null) {
+        return url_to_short[url];
+    }
+
+    counter++;
+    let code = encode_id(counter);
+    let short = `https://sho.rt/${code}`;
+
+    url_to_short[url] = short;
+    short_to_url[short] = url;
+
+    return short;
+}
+
+fn resolve(short_url) {
+    if (short_to_url[short_url] != null) {
+        return short_to_url[short_url];
+    }
+    return null;
+}
+
+// Test the shortener
+let urls = [
+    "https://example.com/long/path",
+    "https://docs.hemlock.org/stdlib",
+    "https://github.com/hemlang/42",
+    "https://example.com/long/path"
+];
+
+print("=== URL Shortener ===");
+for (url in urls) {
+    let short = shorten(url);
+    print(`  ${url}`);
+    print(`  -> ${short}`);
+    print("");
+}
+
+// Resolve back
+print("=== Resolve Short URLs ===");
+let test_short = shorten("https://docs.hemlock.org/stdlib");
+let resolved = resolve(test_short);
+print(`  ${test_short} -> ${resolved}`);
+
+// Verify duplicate gives same short URL
+let s1 = shorten("https://example.com/long/path");
+let s2 = shorten("https://example.com/long/path");
+if (s1 == s2) {
+    print("\nDuplicate URL returns same short URL: ok");
+}

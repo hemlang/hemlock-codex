@@ -1,0 +1,73 @@
+// Go equivalent:
+// package main
+//
+// import (
+//     "fmt"
+//     "time"
+// )
+//
+// func main() {
+//     ch1 := make(chan string)
+//     ch2 := make(chan string)
+//
+//     go func() {
+//         time.Sleep(100 * time.Millisecond)
+//         ch1 <- "result from channel 1"
+//     }()
+//
+//     go func() {
+//         time.Sleep(200 * time.Millisecond)
+//         ch2 <- "result from channel 2"
+//     }()
+//
+//     select {
+//     case msg := <-ch1:
+//         fmt.Println("received:", msg)
+//     case msg := <-ch2:
+//         fmt.Println("received:", msg)
+//     }
+// }
+
+// In Hemlock, there's no direct `select` statement. Instead, we
+// use a result channel where producers send tagged results, and
+// the consumer reads the first one that arrives.
+
+let ch1 = channel(1);
+let ch2 = channel(1);
+
+async fn sender1(ch) {
+    // Fast sender
+    ch.send("result from channel 1");
+}
+
+async fn sender2(ch) {
+    // Slow sender — arrives second
+    ch.send("result from channel 2");
+}
+
+// Merge channels into a single result channel
+let result_ch = channel(2);
+
+async fn relay(src, dest) {
+    let val = src.recv();
+    dest.send(val);
+}
+
+let t1 = spawn(sender1, ch1);
+let t2 = spawn(sender2, ch2);
+let r1 = spawn(relay, ch1, result_ch);
+let r2 = spawn(relay, ch2, result_ch);
+
+// First recv() gets whichever channel sends first (simulates select)
+let msg = result_ch.recv();
+print(`received: ${msg}`);
+
+// Clean up: drain second result, join all tasks
+result_ch.recv();
+join(t1);
+join(t2);
+join(r1);
+join(r2);
+ch1.close();
+ch2.close();
+result_ch.close();

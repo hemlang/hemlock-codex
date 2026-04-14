@@ -1,0 +1,31 @@
+// Python equivalent:
+// import re
+// text = "Order 42 has 3 items weighing 17 kg at price 99"
+// numbers = re.findall(r'\d+', text)
+// for n in numbers:
+//     print(n)
+// print(f"Count: {len(numbers)}")
+// Output: 42, 3, 17, 99
+
+// In Hemlock, regex uses POSIX ERE via @stdlib/regex.
+// compile(pattern, flags) returns an object with test(), replace_all(), etc.
+// To find all matches, we use replace_all to extract them via a split approach.
+
+import { compile } from "@stdlib/regex";
+
+let text = "Order 42 has 3 items weighing 17 kg at price 99";
+
+// Strategy: replace all non-digit sequences with a separator, then split
+let re = compile("[^0-9]+", null);
+let separated = re.replace_all(text, ",");
+re.free();
+
+// Split on comma and filter out empty strings
+let parts = separated.split(",");
+let numbers = parts.filter(fn(s) { return s.length > 0; });
+
+print("Numbers found:");
+for (n in numbers) {
+    print(n);
+}
+print(`Count: ${numbers.length}`);

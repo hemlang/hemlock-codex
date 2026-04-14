@@ -1,0 +1,66 @@
+// Dining Philosophers Problem
+// 5 philosophers, resource ordering to prevent deadlock.
+// Each philosopher picks up the lower-numbered fork first.
+
+import { sleep } from "@stdlib/time";
+
+let num_phil = 5;
+
+// Use channels as mutexes (capacity 1, pre-loaded with a token)
+let forks = [];
+for (let i = 0; i < num_phil; i++) {
+    let fork = channel(1);
+    fork.send(1);  // token means fork is available
+    forks.push(fork);
+}
+
+let results_ch = channel(5);
+
+async fn philosopher(id, forks, num_phil, results_ch) {
+    // Resource ordering: always pick up lower-numbered fork first
+    let left = id;
+    let right = (id + 1) % num_phil;
+
+    let first = left;
+    let second = right;
+    if (left > right) {
+        first = right;
+        second = left;
+    }
+
+    // Pick up forks in order
+    forks[first].recv();
+    forks[second].recv();
+
+    // Eat
+    print(`philosopher ${id} is eating`);
+
+    // Put down forks
+    forks[first].send(1);
+    forks[second].send(1);
+
+    results_ch.send(id);
+}
+
+let tasks = [];
+for (let i = 0; i < num_phil; i++) {
+    tasks.push(spawn(philosopher, i, forks, num_phil, results_ch));
+}
+
+for (let i = 0; i < num_phil; i++) {
+    join(tasks[i]);
+}
+
+for (let i = 0; i < num_phil; i++) {
+    results_ch.recv();
+}
+results_ch.close();
+
+// Close fork channels
+for (let i = 0; i < num_phil; i++) {
+    // Drain remaining token
+    forks[i].recv();
+    forks[i].close();
+}
+
+print("all philosophers ate");

@@ -1,0 +1,42 @@
+// JavaScript equivalent:
+// function riskyOperation(value) {
+//     try {
+//         console.log("try: starting");
+//         if (value < 0) throw new Error("negative value");
+//         if (value === 0) throw new Error("zero value");
+//         console.log("try: success with " + value);
+//     } catch (e) {
+//         console.log("catch: " + e.message);
+//     } finally {
+//         console.log("finally: cleanup");
+//     }
+// }
+// riskyOperation(42);
+// riskyOperation(-1);
+// riskyOperation(0);
+
+// In Hemlock, try/catch/finally has identical syntax to JavaScript.
+// throw takes any value (not just Error objects).
+
+fn risky_operation(value) {
+    try {
+        print("try: starting");
+        if (value < 0) {
+            throw "negative value";
+        }
+        if (value == 0) {
+            throw "zero value";
+        }
+        print(`try: success with ${value}`);
+    } catch (e) {
+        print(`catch: ${e}`);
+    } finally {
+        print("finally: cleanup");
+    }
+}
+
+risky_operation(42);
+print("---");
+risky_operation(-1);
+print("---");
+risky_operation(0);

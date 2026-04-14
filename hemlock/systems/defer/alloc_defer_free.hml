@@ -1,0 +1,23 @@
+fn main() {
+    let a = alloc(8);
+    defer free(a);
+
+    let b = alloc(8);
+    defer free(b);
+
+    let c = alloc(8);
+    defer free(c);
+
+    ptr_write_i32(a, 10);
+    ptr_write_i32(b, 20);
+    ptr_write_i32(c, 30);
+
+    let va = ptr_deref_i32(a);
+    let vb = ptr_deref_i32(b);
+    let vc = ptr_deref_i32(c);
+
+    print(`${va} ${vb} ${vc}`);
+    print("all memory freed");
+}
+
+main();

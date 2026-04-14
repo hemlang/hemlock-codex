@@ -1,0 +1,43 @@
+// JavaScript equivalent:
+// async function fetchData(url) {
+//     try {
+//         const response = await fetch(url);
+//         const data = await response.json();
+//         console.log("status: " + response.status);
+//         console.log("data: " + JSON.stringify(data));
+//     } catch (e) {
+//         console.log("error: " + e.message);
+//     }
+// }
+// fetchData("https://api.example.com/data");
+
+// In Hemlock, fetch becomes http_get from @stdlib/http.
+// JSON parsing uses @stdlib/json. No Promises — just call directly.
+
+import { parse, stringify } from "@stdlib/json";
+
+// Simulate the fetch pattern since network may not be available.
+// The real Hemlock HTTP pattern would be:
+//   import { http_get } from "@stdlib/http";
+//   let response = http_get("https://api.example.com/data");
+
+// Demonstrate the JSON + error handling pattern
+fn simulate_fetch(url) {
+    // In real code: let response = http_get(url);
+    let raw = "{\"name\": \"hemlock\", \"version\": \"2.0.0\"}";
+    return { status: 200, body: raw };
+}
+
+fn handle_response(response) {
+    try {
+        print(`status: ${response.status}`);
+        let data = parse(response.body);
+        print(`name: ${data.name}`);
+        print(`version: ${data.version}`);
+    } catch (e) {
+        print(`error: ${e}`);
+    }
+}
+
+let response = simulate_fetch("https://api.example.com/data");
+handle_response(response);

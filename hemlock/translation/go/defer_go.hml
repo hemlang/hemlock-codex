@@ -1,0 +1,47 @@
+// Go equivalent:
+// package main
+//
+// import "fmt"
+//
+// func multiDefer() {
+//     fmt.Println("start")
+//     defer fmt.Println("first defer")
+//     defer fmt.Println("second defer")
+//     defer fmt.Println("third defer")
+//     fmt.Println("end")
+// }
+//
+// func deferInLoop() {
+//     for i := 0; i < 3; i++ {
+//         defer fmt.Printf("loop defer %d\n", i)
+//     }
+//     fmt.Println("after loop")
+// }
+//
+// func main() {
+//     multiDefer()
+//     fmt.Println("---")
+//     deferInLoop()
+// }
+
+// Hemlock's defer works the same as Go's: LIFO order,
+// evaluated when the enclosing function returns.
+
+fn multi_defer() {
+    print("start");
+    defer print("first defer");
+    defer print("second defer");
+    defer print("third defer");
+    print("end");
+}
+
+fn defer_in_loop() {
+    for (let i = 0; i < 3; i++) {
+        defer print(`loop defer ${i}`);
+    }
+    print("after loop");
+}
+
+multi_defer();
+print("---");
+defer_in_loop();

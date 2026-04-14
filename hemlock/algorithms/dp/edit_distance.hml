@@ -1,0 +1,49 @@
+// Levenshtein Edit Distance
+// Dynamic programming approach to find the minimum number of
+// single-character edits (insert, delete, replace) to transform
+// one string into another.
+
+import { min } from "@stdlib/math";
+
+fn edit_distance(a, b) {
+    let m = a.length;
+    let n = b.length;
+
+    // dp[i][j] = edit distance between a[0..i-1] and b[0..j-1]
+    let dp = [];
+    for (let i = 0; i <= m; i++) {
+        let row = [];
+        for (let j = 0; j <= n; j++) {
+            row.push(0);
+        }
+        dp.push(row);
+    }
+
+    // Base cases: transforming empty string
+    for (let i = 0; i <= m; i++) {
+        dp[i][0] = i;
+    }
+    for (let j = 0; j <= n; j++) {
+        dp[0][j] = j;
+    }
+
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (a.char_at(i - 1) == b.char_at(j - 1)) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                let insert_op = dp[i][j - 1] + 1;
+                let delete_op = dp[i - 1][j] + 1;
+                let replace_op = dp[i - 1][j - 1] + 1;
+                dp[i][j] = min(insert_op, min(delete_op, replace_op));
+            }
+        }
+    }
+
+    return dp[m][n];
+}
+
+let a = "kitten";
+let b = "sitting";
+let result = edit_distance(a, b);
+print(`edit distance: ${result}`);

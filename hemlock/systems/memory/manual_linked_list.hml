@@ -1,0 +1,54 @@
+// Manual linked list using alloc/free
+// Node layout: 4 bytes (i32 value) + 8 bytes (ptr next) = 12 bytes per node
+
+let NODE_SIZE = 12;
+let head = null;
+
+fn push(val: i32) {
+    let node = alloc(NODE_SIZE);
+    ptr_write_i32(node, val);
+    let next_slot = ptr_offset(node, 4, 1);
+    if (head != null) {
+        ptr_write_ptr(next_slot, head);
+    } else {
+        ptr_write_i64(next_slot, 0);
+    }
+    head = node;
+}
+
+fn get_next(node) {
+    let next_slot = ptr_offset(node, 4, 1);
+    let raw = ptr_deref_i64(next_slot);
+    if (raw == 0) { return null; }
+    return ptr_deref_ptr(next_slot);
+}
+
+fn traverse() {
+    write("list:");
+    let current = head;
+    while (current != null) {
+        let val = ptr_deref_i32(current);
+        write(` ${val}`);
+        current = get_next(current);
+    }
+    print("");
+}
+
+fn free_all() {
+    let current = head;
+    let count = 0;
+    while (current != null) {
+        let next = get_next(current);
+        free(current);
+        count++;
+        current = next;
+    }
+    head = null;
+    print(`freed ${count} nodes`);
+}
+
+push(10);
+push(20);
+push(30);
+traverse();
+free_all();

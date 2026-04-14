@@ -1,0 +1,36 @@
+// File watcher: write a file, check for changes, detect modification
+import { write_file, read_file, exists } from "@stdlib/fs";
+import { time_ms } from "@stdlib/time";
+
+let watch_path = "/tmp/hemlock_watch_test.txt";
+
+// Write initial file
+write_file(watch_path, "initial content");
+let t1 = time_ms();
+print(`[watcher] monitoring: ${watch_path}`);
+print(`[watcher] initial write at t=${t1}`);
+
+// Read to confirm initial content
+let initial = read_file(watch_path);
+print(`[watcher] initial content: ${initial}`);
+
+// Modify the file
+write_file(watch_path, "modified content");
+let t2 = time_ms();
+print(`[watcher] file modified at t=${t2}`);
+
+// Detect change by reading content
+let content = read_file(watch_path);
+if (content == "modified content") {
+    print("[watcher] file change detected");
+    print(`[watcher] new content: ${content}`);
+} else {
+    print("[watcher] no change detected");
+}
+
+// Check timestamps differ
+if (t2 > t1) {
+    print("[watcher] modification time advanced");
+}
+
+print("[watcher] done");

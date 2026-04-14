@@ -1,0 +1,49 @@
+// C equivalent:
+// #include <stdio.h>
+// #include <signal.h>
+// #include <unistd.h>
+//
+// volatile sig_atomic_t got_signal = 0;
+//
+// void handler(int sig) {
+//     got_signal = 1;
+//     printf("caught signal %d\n", sig);
+// }
+//
+// int main() {
+//     signal(SIGUSR1, handler);
+//     printf("signal handler registered\n");
+//     raise(SIGUSR1);
+//     if (got_signal) {
+//         printf("signal was handled\n");
+//     }
+//     return 0;
+// }
+
+// In Hemlock, signal handling uses @stdlib/signal.
+// The API is similar: register a callback for a signal number.
+// SIGUSR1 = 10 on Linux.
+
+import { signal, SIGUSR1 } from "@stdlib/signal";
+
+let got_signal = false;
+
+fn handler(sig) {
+    got_signal = true;
+    print(`caught signal ${sig}`);
+}
+
+signal(SIGUSR1, handler);
+print("signal handler registered");
+
+// Raise SIGUSR1 to ourselves via process kill
+import { exec } from "@stdlib/process";
+import { get_pid } from "@stdlib/env";
+
+let pid = get_pid();
+exec("kill", ["-USR1", `${pid}`]);
+
+// Small busy-wait to let signal be delivered
+if (got_signal) {
+    print("signal was handled");
+}

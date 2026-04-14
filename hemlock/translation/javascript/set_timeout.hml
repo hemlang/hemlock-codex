@@ -1,0 +1,29 @@
+// JavaScript equivalent:
+// setTimeout(() => console.log("fast (0.1s)"), 100);
+// setTimeout(() => console.log("medium (0.2s)"), 200);
+// setTimeout(() => console.log("slow (0.3s)"), 300);
+// console.log("all scheduled");
+
+// In Hemlock, there's no setTimeout. Use spawn + sleep instead.
+// Each "timeout" becomes an async task that sleeps then executes.
+
+import { sleep } from "@stdlib/time";
+
+async fn delayed(secs, msg) {
+    sleep(secs);
+    print(msg);
+}
+
+// Schedule 3 delayed operations (sleep takes seconds in Hemlock)
+let t1 = spawn(delayed, 0.1, "fast (0.1s)");
+let t2 = spawn(delayed, 0.2, "medium (0.2s)");
+let t3 = spawn(delayed, 0.3, "slow (0.3s)");
+
+print("all scheduled");
+
+// Wait for all to complete (like waiting for all timeouts)
+join(t1);
+join(t2);
+join(t3);
+
+print("all complete");

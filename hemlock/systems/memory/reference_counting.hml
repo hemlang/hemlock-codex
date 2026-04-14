@@ -1,0 +1,68 @@
+// Manual reference counting with alloc
+// Object layout: 4 bytes (i32 refcount) + 4 bytes (i32 data) = 8 bytes
+
+let OBJ_SIZE = 8;
+
+fn rc_new(data: i32) {
+    let obj = alloc(OBJ_SIZE);
+    ptr_write_i32(obj, 1); // refcount = 1
+    let data_slot = ptr_offset(obj, 4, 1);
+    ptr_write_i32(data_slot, data);
+    print(`created obj(data=${data}, refcount=1)`);
+    return obj;
+}
+
+fn rc_retain(obj) {
+    let rc = ptr_deref_i32(obj);
+    rc++;
+    ptr_write_i32(obj, rc);
+    let data_slot = ptr_offset(obj, 4, 1);
+    let data = ptr_deref_i32(data_slot);
+    print(`retain obj(data=${data}, refcount=${rc})`);
+    return obj;
+}
+
+fn rc_release(obj) {
+    let rc = ptr_deref_i32(obj);
+    rc--;
+    let data_slot = ptr_offset(obj, 4, 1);
+    let data = ptr_deref_i32(data_slot);
+    if (rc == 0) {
+        print(`release obj(data=${data}, refcount=0) -> freed`);
+        free(obj);
+        return null;
+    }
+    ptr_write_i32(obj, rc);
+    print(`release obj(data=${data}, refcount=${rc})`);
+    return obj;
+}
+
+fn rc_get_data(obj) {
+    let data_slot = ptr_offset(obj, 4, 1);
+    return ptr_deref_i32(data_slot);
+}
+
+fn rc_get_count(obj) {
+    return ptr_deref_i32(obj);
+}
+
+// Demo: shared ownership
+print("--- create object ---");
+let a = rc_new(42);
+
+print("--- share with b ---");
+let b = rc_retain(a);
+
+print("--- share with c ---");
+let c = rc_retain(a);
+
+print(`data: ${rc_get_data(a)}, refcount: ${rc_get_count(a)}`);
+
+print("--- release a ---");
+a = rc_release(a);
+
+print("--- release b ---");
+b = rc_release(b);
+
+print("--- release c (last ref, should free) ---");
+c = rc_release(c);

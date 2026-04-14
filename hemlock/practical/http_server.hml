@@ -1,0 +1,47 @@
+// Simulated HTTP server using channels for request/response pattern
+
+let request_ch = channel(10);
+let response_ch = channel(10);
+
+// Simulated server handler
+async fn server(req_ch, res_ch) {
+    for (let i = 0; i < 3; i++) {
+        let req = req_ch.recv();
+        let method = req.method;
+        let path = req.path;
+        let body = "";
+        let status = 200;
+
+        if (path == "/") {
+            body = "Hello, World!";
+        } else if (path == "/about") {
+            body = "About Page";
+        } else {
+            status = 404;
+            body = "Not Found";
+        }
+
+        res_ch.send({ status: status, body: body, method: method, path: path });
+    }
+}
+
+// Simulated client
+async fn client(req_ch, res_ch) {
+    let requests = [
+        { method: "GET", path: "/" },
+        { method: "GET", path: "/about" },
+        { method: "GET", path: "/missing" }
+    ];
+
+    for (req in requests) {
+        req_ch.send(req);
+        let res = res_ch.recv();
+        print(`[simulated] ${res.method} ${res.path} -> ${res.status} ${res.body}`);
+    }
+}
+
+let srv = spawn(server, request_ch, response_ch);
+let cli = spawn(client, request_ch, response_ch);
+
+join(cli);
+join(srv);

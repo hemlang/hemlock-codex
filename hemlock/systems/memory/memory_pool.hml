@@ -1,0 +1,69 @@
+// Fixed-size slab allocator / object pool
+// Pool of 8 slots, each 8 bytes
+
+let SLOT_SIZE = 8;
+let POOL_SLOTS = 8;
+let pool = alloc(SLOT_SIZE * POOL_SLOTS);
+let used = [false, false, false, false, false, false, false, false];
+let alloc_count = 0;
+
+fn pool_alloc() {
+    for (let i = 0; i < POOL_SLOTS; i++) {
+        if (used[i] == false) {
+            used[i] = true;
+            alloc_count++;
+            let slot = ptr_offset(pool, i, SLOT_SIZE);
+            print(`alloc slot ${i}`);
+            return slot;
+        }
+    }
+    print("pool exhausted!");
+    return null;
+}
+
+fn pool_free(slot_index: i32) {
+    if (used[slot_index] == true) {
+        used[slot_index] = false;
+        alloc_count--;
+        print(`freed slot ${slot_index}`);
+    }
+}
+
+fn active_count() {
+    let count = 0;
+    for (let i = 0; i < POOL_SLOTS; i++) {
+        if (used[i] == true) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Allocate 5 slots
+let s0 = pool_alloc();
+let s1 = pool_alloc();
+let s2 = pool_alloc();
+let s3 = pool_alloc();
+let s4 = pool_alloc();
+
+// Write data to them
+ptr_write_i64(s0, 100);
+ptr_write_i64(s1, 200);
+
+print(`active: ${active_count()}`);
+
+// Free 2 slots
+pool_free(1);
+pool_free(3);
+
+print(`active after free: ${active_count()}`);
+
+// Allocate 3 more (2 reuse freed slots, 1 new)
+let s5 = pool_alloc();
+let s6 = pool_alloc();
+let s7 = pool_alloc();
+
+print(`final active: ${active_count()}`);
+
+free(pool);
+print("pool freed");

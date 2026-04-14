@@ -1,0 +1,57 @@
+fn make_ring(capacity) {
+    let p = alloc(capacity * 4);
+    return { ptr: p, capacity: capacity, head: 0, tail: 0, count: 0 };
+}
+
+fn ring_write(rb, val) {
+    if (rb.count == rb.capacity) {
+        print(`ring full, cannot write ${val}`);
+        return false;
+    }
+    ptr_write_i32(ptr_offset(rb.ptr, rb.tail, 4), val);
+    rb.tail = (rb.tail + 1) % rb.capacity;
+    rb.count++;
+    return true;
+}
+
+fn ring_read(rb) {
+    if (rb.count == 0) {
+        print("ring empty");
+        return null;
+    }
+    let val = ptr_deref_i32(ptr_offset(rb.ptr, rb.head, 4));
+    rb.head = (rb.head + 1) % rb.capacity;
+    rb.count--;
+    return val;
+}
+
+fn ring_free(rb) {
+    free(rb.ptr);
+}
+
+let rb = make_ring(4);
+
+// Write 1, 2, 3, 4
+ring_write(rb, 1);
+ring_write(rb, 2);
+ring_write(rb, 3);
+ring_write(rb, 4);
+
+// Read 2
+let results = [];
+results.push(ring_read(rb));
+results.push(ring_read(rb));
+
+// Write 5, 6
+ring_write(rb, 5);
+ring_write(rb, 6);
+
+// Read rest
+results.push(ring_read(rb));
+results.push(ring_read(rb));
+results.push(ring_read(rb));
+results.push(ring_read(rb));
+
+print(results.join(" "));
+
+ring_free(rb);

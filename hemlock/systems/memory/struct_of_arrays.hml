@@ -1,0 +1,55 @@
+// SoA layout with ptr arithmetic (parallel arrays for x, y, z coordinates)
+import { sqrt } from "@stdlib/math";
+
+let COUNT = 5;
+// Three separate arrays for x, y, z (f64 = 8 bytes each)
+let xs = alloc(COUNT * 8);
+let ys = alloc(COUNT * 8);
+let zs = alloc(COUNT * 8);
+
+fn set_point(i: i32, x: f64, y: f64, z: f64) {
+    ptr_write_f64(ptr_offset(xs, i, 8), x);
+    ptr_write_f64(ptr_offset(ys, i, 8), y);
+    ptr_write_f64(ptr_offset(zs, i, 8), z);
+}
+
+fn get_x(i: i32) {
+    return ptr_deref_f64(ptr_offset(xs, i, 8));
+}
+
+fn get_y(i: i32) {
+    return ptr_deref_f64(ptr_offset(ys, i, 8));
+}
+
+fn get_z(i: i32) {
+    return ptr_deref_f64(ptr_offset(zs, i, 8));
+}
+
+fn distance(i: i32) {
+    let x = get_x(i);
+    let y = get_y(i);
+    let z = get_z(i);
+    return sqrt(x * x + y * y + z * z);
+}
+
+// Store 5 3D points
+set_point(0, 1.0, 0.0, 0.0);
+set_point(1, 0.0, 2.0, 0.0);
+set_point(2, 0.0, 0.0, 3.0);
+set_point(3, 1.0, 1.0, 1.0);
+set_point(4, 3.0, 4.0, 0.0);
+
+// Compute and print distances from origin
+for (let i = 0; i < COUNT; i++) {
+    let x = get_x(i);
+    let y = get_y(i);
+    let z = get_z(i);
+    let d = distance(i);
+    print(`point ${i}: (${x}, ${y}, ${z}) distance = ${d}`);
+}
+
+// Free all arrays
+free(xs);
+free(ys);
+free(zs);
+print("all arrays freed");
