@@ -8,6 +8,8 @@ import re
 import sys
 from pathlib import Path
 
+from task_descriptions import DESCRIPTIONS
+
 SEED = 42
 random.seed(SEED)
 
@@ -25,7 +27,7 @@ LANGUAGES = {
 }
 
 TRANSLATION_TEMPLATES = [
-    "Translate this {lang} {desc} to Hemlock:\n\n```{fence}\n{code}\n```",
+    "Translate this {lang} code to Hemlock:\n\n```{fence}\n{code}\n```",
     "Convert the following {lang} code to Hemlock:\n\n```{fence}\n{code}\n```",
     "Rewrite this {lang} program in Hemlock:\n\n```{fence}\n{code}\n```",
     "Port this {lang} implementation to Hemlock:\n\n```{fence}\n{code}\n```",
@@ -125,69 +127,24 @@ def extract_description_from_code(hemlock_code: str, basename: str, category: st
     return filename_to_description(basename)
 
 
-def generate_scratch_instruction(basename: str, category: str, hemlock_code: str) -> str:
-    """Generate a 'write from scratch' instruction based on category and code analysis."""
-    desc = extract_description_from_code(hemlock_code, basename, category)
-    friendly_name = filename_to_description(basename)
+GENERATION_TEMPLATES = [
+    "{desc}",
+    "Write a Hemlock program for the following task: {desc}",
+    "In Hemlock, {desc_lower}",
+    "Using Hemlock, {desc_lower}",
+]
 
-    cat_parts = category.split("/")
-    cat_type = cat_parts[0] if cat_parts else ""
-    cat_sub = cat_parts[1] if len(cat_parts) > 1 else ""
 
-    templates_by_category = {
-        "sorting": [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-            f"Implement {friendly_name.lower()} in Hemlock. The program should sort an array and print the result.",
-        ],
-        "search": [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-            f"Implement {friendly_name.lower()} in Hemlock. Search for elements in a sorted array.",
-        ],
-        "trees": [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-            f"Implement a {friendly_name.lower()} in Hemlock using pointer-based nodes with alloc/free.",
-        ],
-        "graphs": [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-            f"Implement {friendly_name.lower()} in Hemlock using adjacency lists.",
-        ],
-        "dp": [
-            f"Write a Hemlock program that solves the {friendly_name.lower()} problem using dynamic programming. {desc}.",
-            f"Implement {friendly_name.lower()} in Hemlock using a DP approach.",
-        ],
-        "classic": [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-        ],
-        "memory": [
-            f"Write a Hemlock program that demonstrates {friendly_name.lower()} using manual memory management. {desc}.",
-            f"Implement {friendly_name.lower()} in Hemlock using alloc/free and pointer operations.",
-        ],
-        "concurrency": [
-            f"Write a Hemlock program that demonstrates the {friendly_name.lower()} pattern using async/channels. {desc}.",
-            f"Implement {friendly_name.lower()} in Hemlock using structured concurrency.",
-        ],
-        "defer": [
-            f"Write a Hemlock program that demonstrates {friendly_name.lower()} using defer for cleanup. {desc}.",
-        ],
-    }
+def generate_scratch_instruction(basename: str, category: str) -> str:
+    """Generate a 'write from scratch' instruction using hand-curated descriptions."""
+    desc = DESCRIPTIONS.get((category, basename))
+    if desc is None:
+        raise KeyError(f"Missing description for ({category}, {basename})")
 
-    if cat_type == "practical":
-        templates = [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-            f"Build a {friendly_name.lower()} in Hemlock. {desc}.",
-        ]
-    elif cat_type == "translation":
-        # For translation subdirectories, describe what the program does without mentioning source language
-        templates = [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-            f"Implement {friendly_name.lower()} in Hemlock. {desc}.",
-        ]
-    else:
-        templates = templates_by_category.get(cat_sub, [
-            f"Write a Hemlock program that implements {friendly_name.lower()}. {desc}.",
-        ])
-
-    return random.choice(templates)
+    template = random.choice(GENERATION_TEMPLATES)
+    # For lowered templates, lowercase the first letter only
+    desc_lower = desc[0].lower() + desc[1:] if desc else desc
+    return template.format(desc=desc, desc_lower=desc_lower)
 
 
 def main():
@@ -218,12 +175,10 @@ def main():
             rel_path, hml_path = hemlock_index[basename]
             source_code = read_file_stripped(source_file)
             hemlock_code = read_file_stripped(hml_path)
-            desc = filename_to_description(basename)
 
             template = random.choice(TRANSLATION_TEMPLATES)
             instruction = template.format(
                 lang=lang_name,
-                desc=desc,
                 fence=fence,
                 code=source_code,
             )
@@ -242,7 +197,7 @@ def main():
     for basename, (rel_path, hml_path) in sorted(hemlock_index.items()):
         hemlock_code = read_file_stripped(hml_path)
         category = get_hemlock_category(rel_path)
-        instruction = generate_scratch_instruction(basename, category, hemlock_code)
+        instruction = generate_scratch_instruction(basename, category)
 
         rows.append({
             "instruction": instruction,
