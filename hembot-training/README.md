@@ -1,59 +1,137 @@
-# Hembot-Specific Training Dataset
+# Hembot-DPO
 
-Dataset for fine-tuning Hemlock-Apothecary to work optimally with the hembot agent.
+DPO (Direct Preference Optimization) training dataset for fine-tuning Hemlock-Apothecary to work optimally as the hembot coding agent.
 
-## Overview
+[![Dataset License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Format](https://img.shields.io/badge/Format-CSV-green.svg)]()
+[![Size](https://img.shields.io/badge/Size-127%20examples-purple.svg)]()
 
-This dataset teaches the model:
-1. **Always use code fences** - Every response wrapped in ```hemlock blocks
-2. **Concise output** - No verbose explanations or C equivalents
-3. **Error recovery** - How to fix code based on sandbox error messages
-4. **Hemlock idioms** - Use the language correctly and idiomatically
+## Quick Start
 
-## Current Status
+```python
+from datasets import load_dataset
 
-- **127 examples** generated from hemlock-codex
-- **122 instruction-response pairs** from algorithms, systems, translation, practical examples
-- **5 additional simple examples** for basic tasks
-- **Error recovery variants** for select examples
+# Load the dataset
+dataset = load_dataset("hemlang/Hembot-DPO")
 
-## Usage
-
-Generate the dataset:
-```bash
-python3 generate_dataset.py
+# Each example has:
+# - prompt: user instruction
+# - chosen: preferred response (concise, code-fenced)
+# - rejected: undesirable response (verbose, cross-language comparisons)
+for example in dataset["train"]:
+    print(example["prompt"])
+    print(example["chosen"])
+    print(example["rejected"])
 ```
 
-The output `dataset.jsonl` is in standard SFT format ready for fine-tuning.
+## What This Trains
 
-## Dataset Format
+The DPO pairs teach the model to prefer **concise, focused responses** over verbose ones:
 
-Each example follows the standard instruction-following format:
+| ✅ Prefer | ❌ Avoid |
+|-----------|----------|
+| Code fences around all Hemlock code | Bare code without fences |
+| Concise responses | Excessive explanation |
+| Hemlock-focused output | Unnecessary C/Python comparisons |
+| Direct answers | Verbose preambles/postambles |
 
-```json
-{
-  "instruction": "User prompt or task description",
-  "input": "",
-  "output": "Model response with ```hemlock fenced code"
+## Example
+
+**Prompt:**
+```
+Implement Bracket Matching (classic algorithm)
+```
+
+**Chosen (preferred):**
+```
+Here's an implementation of Bracket Matching:
+
+```hemlock
+fn is_balanced(s) {
+    let stack = [];
+    let chars = s.chars();
+    for (let i = 0; i < chars.length; i++) {
+        let c = chars[i];
+        if (c == '(' || c == '{' || c == '[') {
+            stack.push(c);
+        } else if (c == ')' || c == '}' || c == ']') {
+            if (stack.length == 0) {
+                return false;
+            }
+            let top = stack.pop();
+            if (c == ')' && top != '(') { return false; }
+            if (c == '}' && top != '{') { return false; }
+            if (c == ']' && top != '[') { return false; }
+        }
+    }
+    return stack.length == 0;
 }
 ```
+```
 
-## Next Steps
+**Rejected (undesirable):**
+```
+Let me help you with that. Here's what we need to do:
 
-1. **Expand error recovery examples** - Add 100+ more error→fix pairs
-2. **Add conversational variants** - Follow-up questions and multi-turn examples
-3. **Include more simple tasks** - Common programming patterns
-4. **Validate all examples** - Ensure code runs successfully
-5. **Fine-tune model** - Train Hemlock-Apothecary-7B-Hembot variant
+```hemlock
+// ... same code ...
+```
+
+This works similarly to how you might do it in C, where you'd use a stack data structure and iterate through the string checking for matching brackets. The main difference is that Hemlock has built-in array methods like push() and pop() that make this cleaner than manual stack management in C.
+```
+
+## Dataset Statistics
+
+- **Total examples:** 127
+- **Format:** JSONL (prompt, chosen, rejected fields)
+- **File size:** 376 KB
+- **Source:** Converted from hemlock-codex SFT dataset
 
 ## Files
 
-- `generate_dataset.py` - Script to generate dataset from hemlock-codex
-- `dataset.jsonl` - Generated SFT dataset
-- `HEMBOT_TRAINING_PLAN.md` - Detailed plan and strategy
-- `instructions/` - Organized instruction examples (future)
-- `error-recovery/` - Error→fix pairs (future)
+- `dataset_dpo.jsonl` - Main dataset file (JSONL format)
+
+## Usage for DPO Fine-Tuning
+
+### With Axolotl
+
+```yaml
+# config.yaml
+dataset_msha: dataset_dpo.jsonl
+dataset_train_split: train
+dataset_text_field: prompt
+dataset_input_field: prompt
+dataset_output_field: chosen
+```
+
+### With TRL
+
+```python
+from trl import DPOTrainer
+
+# Load and format dataset
+dataset = load_dataset("hemlang/Hembot-DPO")
+
+trainer = DPOTrainer(
+    model=model,
+    ref_model=ref_model,
+    train_dataset=dataset["train"],
+    args=training_args,
+    formatting_func=lambda x: {
+        "prompt": x["prompt"],
+        "chosen": x["chosen"],
+        "rejected": x["rejected"]
+    }
+)
+```
+
+## Related Resources
+
+- **hembot**: The Hemlock coding agent — https://github.com/hemlang/hembot
+- **Hemlock-Apothecary-7B**: Base model to fine-tune — https://huggingface.co/nbeerbower/Hemlock-Apothecary-7B
+- **SFT Dataset**: Instruction-tuning version — https://github.com/hemlang/hemlock-codex/tree/main/hembot-training
+- **Hemlock Language**: Documentation — https://github.com/hemlang/hemlock
 
 ## License
 
-Same as Hemlock.
+MIT License — see LICENSE file for details.
