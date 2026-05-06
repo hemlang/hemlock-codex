@@ -3,7 +3,7 @@
 DPO (Direct Preference Optimization) training dataset for fine-tuning Hemlock-Apothecary to work optimally as the hembot coding agent.
 
 [![Dataset License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Format](https://img.shields.io/badge/Format-CSV-green.svg)]()
+[![Format](https://img.shields.io/badge/Format-JSONL-green.svg)]()
 [![Size](https://img.shields.io/badge/Size-127%20examples-purple.svg)]()
 
 ## Quick Start
